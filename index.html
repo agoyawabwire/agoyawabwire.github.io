@@ -288,13 +288,14 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyDLiyxlQNcBXH9WkrJlZKhE7XwTWf_8rCA",
-        authDomain: "poutry-569e6.firebaseapp.com",
-        projectId: "poutry-569e6",
-        storageBucket: "poutry-569e6.firebasestorage.app",
-        messagingSenderId: "297732089999",
-        appId: "1:297732089999:web:47543c3e2b4d28d84de8fa"
-    };
+    apiKey: "AIzaSyDLiyxlQNcBXH9WkrJlZKhE7XwTWf_8rCA",
+    authDomain: "poutry-569e6.firebaseapp.com",
+    projectId: "poutry-569e6",
+    storageBucket: "poutry-569e6.firebasestorage.app",
+    messagingSenderId: "297732089999",
+    appId: "1:297732089999:web:47543c3e2b4d28d84de8fa",
+    databaseURL: "https://poutry-569e6-default-rtdb.europe-west1.firebasedatabase.app" // Added databaseURL
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
