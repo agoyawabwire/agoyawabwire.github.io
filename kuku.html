@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PoultryFlow Pro | Farm Tracker with Authentication</title>
+    <!-- Firebase SDKs -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+                "firebase/analytics": "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js"
+            }
+        }
+    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { transition: all 0.2s ease; }
+        body { background: #f0f4f0; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -12px rgba(0,0,0,0.15); }
+        input, select, textarea {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: white;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22,163,74,0.2);
+        }
+        .btn-primary {
+            background-color: #15803d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background-color: #166534; }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-danger:hover { background-color: #b91c1c; }
+        .tab-active {
+            border-bottom: 2px solid #15803d;
+            color: #15803d;
+            font-weight: 600;
+        }
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f2937;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            z-index: 1000;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .loading-spinner {
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #15803d;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: white;
+            max-width: 450px;
+            width: 90%;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Authentication Modal (shown when logged out) -->
+<div id="authModal" class="auth-overlay">
+    <div class="auth-card">
+        <div class="text-center mb-6">
+            <i class="fas fa-egg text-green-600 text-4xl"></i>
+            <h2 class="text-2xl font-bold mt-2 text-gray-800">PoultryFlow Pro</h2>
+            <p class="text-gray-500 text-sm">Sign in to manage your farm</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="loginEmail" class="w-full" placeholder="farmer@example.com">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="loginPassword" class="w-full" placeholder="••••••••">
+            </div>
+            <button id="loginBtn" class="btn-primary w-full">Sign In</button>
+            <p class="text-center text-sm text-gray-600 mt-4">
+                Don't have an account? 
+                <button id="showRegisterBtn" class="text-green-700 font-semibold">Register</button>
+            </p>
+        </div>
+        
+        <!-- Register Form (hidden initially) -->
+        <div id="registerForm" class="hidden">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input type="text" id="regName" class="w-full" placeholder="John Doe">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="regEmail" class="w-full" placeholder="farmer@example.com">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="regPassword" class="w-full" placeholder="Min 6 characters">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input type="password" id="regConfirmPassword" class="w-full" placeholder="Confirm password">
+            </div>
+            <button id="registerBtn" class="btn-primary w-full">Create Account</button>
+            <p class="text-center text-sm text-gray-600 mt-4">
+                Already have an account? 
+                <button id="showLoginBtn" class="text-green-700 font-semibold">Sign In</button>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Main App (hidden until authenticated) -->
+<div id="mainApp" class="hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header with User Info -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-3">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-egg text-green-700"></i> PoultryFlow Pro
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Firebase + Auth</span>
+                </h1>
+                <p class="text-gray-500 text-sm">Real-time poultry tracking | Sheets-inspired analytics</p>
+            </div>
+            <div class="flex gap-2 items-center">
+                <span id="userEmailDisplay" class="text-sm text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm">
+                    <i class="fas fa-user-circle mr-1"></i> Loading...
+                </span>
+                <button id="logoutBtn" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-200">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+                <button id="exportReportBtn" class="bg-white border border-gray-300 px-4 py-2 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 text-sm">
+                    <i class="fas fa-download mr-1"></i> Export
+                </button>
+                <button id="seedDemoBtn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">
+                    <i class="fas fa-database mr-1"></i> Demo Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Connection status -->
+        <div id="connStatus" class="text-xs mb-3 flex items-center gap-2 justify-end">
+            <span id="statusDot" class="w-2 h-2 rounded-full bg-green-500"></span>
+            <span id="statusText" class="text-gray-500">Connected to Firestore</span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200 mb-6 flex gap-6 overflow-x-auto">
+            <button data-tab="dashboard" class="tab-btn py-2 px-1 text-gray-600 font-medium text-base border-b-2 border-transparent tab-active">📊 Dashboard</button>
+            <button data-tab="daily" class="tab-btn py-2 px-1 text-gray-600 font-medium text-base border-b-2 border-transparent">🐔 Daily Production</button>
+            <button data-tab="sales" class="tab-btn py-2 px-1 text-gray-600 font-medium text-base border-b-2 border-transparent">💰 Sales Log</button>
+            <button data-tab="expenses" class="tab-btn py-2 px-1 text-gray-600 font-medium text-base border-b-2 border-transparent">📉 Expenses</button>
+            <button data-tab="flock" class="tab-btn py-2 px-1 text-gray-600 font-medium text-base border-b-2 border-transparent">🐣 Flock Setup</button>
+        </div>
+
+        <!-- DASHBOARD SECTION -->
+        <div id="dashboard-section" class="tab-content">
+            <div class="bg-white rounded-xl shadow p-4 mb-6 flex flex-wrap justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                    <label class="font-semibold text-gray-700">Reporting Month:</label>
+                    <input type="month" id="dashboardMonth" class="border-gray-300 rounded-lg px-3 py-1.5 w-44" value="2026-06">
+                </div>
+                <div class="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full"><i class="fas fa-chart-line mr-1"></i> SUMIFS / AVERAGEIFS logic</div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-8 border-green-500 card-hover">
+                    <div class="text-gray-500 text-sm uppercase tracking-wide">Total Eggs</div>
+                    <div class="text-3xl font-extrabold text-gray-800" id="kpiTotalEggs">0</div>
+                    <div class="text-xs text-green-600 mt-1"><i class="fas fa-egg"></i> collected this month</div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-8 border-blue-400 card-hover">
+                    <div class="text-gray-500 text-sm uppercase tracking-wide">Feed Used (kg)</div>
+                    <div class="text-3xl font-extrabold text-gray-800" id="kpiFeedUsed">0</div>
+                    <div class="text-xs text-blue-600">total consumption</div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-8 border-yellow-500 card-hover">
+                    <div class="text-gray-500 text-sm uppercase tracking-wide">Avg Laying Rate</div>
+                    <div class="text-3xl font-extrabold text-gray-800" id="kpiLayingRate">0%</div>
+                    <div class="text-xs text-yellow-600">eggs / active birds</div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-8 border-red-400 card-hover">
+                    <div class="text-gray-500 text-sm uppercase tracking-wide">Mortality</div>
+                    <div class="text-3xl font-extrabold text-gray-800" id="kpiMortality">0</div>
+                    <div class="text-xs text-red-500">total bird losses</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                <div class="bg-white shadow rounded-xl p-5">
+                    <h3 class="font-semibold text-gray-700"><i class="fas fa-dollar-sign text-green-600 mr-1"></i> Gross Revenue</h3>
+                    <p class="text-2xl font-bold text-gray-800 mt-2" id="financeRevenue">KES 0</p>
+                </div>
+                <div class="bg-white shadow rounded-xl p-5">
+                    <h3 class="font-semibold text-gray-700"><i class="fas fa-receipt text-red-500 mr-1"></i> Total Expenses</h3>
+                    <p class="text-2xl font-bold text-gray-800 mt-2" id="financeExpenses">KES 0</p>
+                </div>
+                <div class="bg-white shadow rounded-xl p-5" id="profitCard">
+                    <h3 class="font-semibold text-gray-700"><i class="fas fa-chart-line"></i> Net Profit</h3>
+                    <p class="text-2xl font-bold mt-2" id="financeProfit">KES 0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4 mb-5">
+                <h3 class="font-semibold text-gray-700 mb-3">📈 Daily Egg Production Trend (last 14 days)</h3>
+                <canvas id="eggTrendChart" height="100" style="max-height: 300px; width:100%"></canvas>
+            </div>
+        </div>
+
+        <!-- DAILY PRODUCTION -->
+        <div id="daily-section" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+                <h2 class="text-xl font-semibold mb-4"><i class="fas fa-clipboard-list text-green-700"></i> Log Daily Metrics</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                    <input type="date" id="dailyDate" class="w-full" value="2026-06-09">
+                    <input type="number" id="activeBirds" placeholder="Active Birds" class="w-full" value="480">
+                    <input type="number" id="eggsCollected" placeholder="Eggs Collected" class="w-full" value="425">
+                    <input type="number" id="damagedEggs" placeholder="Damaged Eggs" class="w-full" value="12">
+                    <input type="number" id="feedKg" placeholder="Feed Consumed (kg)" class="w-full" value="68.5">
+                    <input type="number" id="mortalityCount" placeholder="Mortality" class="w-full" value="2">
+                    <button id="addDailyEntry" class="btn-primary col-span-full md:col-span-1"><i class="fas fa-save mr-1"></i> Save Daily Record</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-100"><tr><th class="p-3">Date</th><th>Active Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed(kg)</th><th>Mortality</th><th></th></tr>
+                        </thead>
+                        <tbody id="dailyTableBody"><tr><td colspan="9" class="text-center p-4"><div class="loading-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SALES LOG -->
+        <div id="sales-section" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+                <h2 class="text-xl font-semibold mb-4">💰 Record Sale</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="date" id="saleDate" value="2026-06-09">
+                    <select id="saleItemType"><option>Eggs (Crates)</option><option>Eggs (Single)</option><option>Culled Birds</option><option>Broilers</option></select>
+                    <input type="number" id="saleQuantity" placeholder="Quantity" value="5">
+                    <input type="number" id="saleUnitPrice" placeholder="Unit Price (KES)" value="450">
+                    <input type="text" id="customerProfile" placeholder="Customer" value="Local Market">
+                    <select id="paymentStatus"><option>Paid</option><option>Credit/Pending</option></select>
+                    <button id="addSaleBtn" class="btn-primary">+ Add Sale</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-x-auto">
+                <table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th class="p-3">Date</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th></th></tr></thead><tbody id="salesTableBody"><tr><td colspan="8" class="text-center p-4">Loading...</td></tr></tbody></table>
+            </div>
+        </div>
+
+        <!-- EXPENSES -->
+        <div id="expenses-section" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+                <h2 class="text-xl font-semibold mb-4">📝 Record Expense</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="date" id="expenseDate" value="2026-06-09">
+                    <select id="expenseCategory"><option>Feed</option><option>Vet/Medication</option><option>Labour</option><option>Utilities</option><option>Transport</option><option>Chicks Bought</option></select>
+                    <input type="text" id="expenseDesc" placeholder="Description">
+                    <input type="number" id="expenseQty" placeholder="Quantity" value="1">
+                    <input type="number" id="expenseTotalCost" placeholder="Total Cost (KES)" value="5200">
+                    <button id="addExpenseBtn" class="btn-primary">Add Expense</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th class="p-3">Date</th><th>Category</th><th>Description</th><th>Qty</th><th>Total (KES)</th><th></th></tr></thead><tbody id="expensesTableBody"><tr><td colspan="6" class="text-center p-4">Loading...</td></tr></tbody></table></div>
+        </div>
+
+        <!-- FLOCK SETUP -->
+        <div id="flock-section" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow p-6 max-w-lg">
+                <h2 class="text-xl font-semibold mb-3"><i class="fas fa-users"></i> Flock Settings</h2>
+                <label>Flock Name / Batch:</label>
+                <input type="text" id="flockName" class="w-full mb-3" placeholder="Layer Batch A-2026">
+                <label>Bird Type:</label>
+                <select id="birdType"><option>Layers</option><option>Broilers</option></select>
+                <button id="updateFlockBtn" class="btn-primary mt-3">Update Flock Info</button>
+                <div class="mt-6 text-sm text-gray-500 border-t pt-4">✅ User-specific data stored in Firestore</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, where } from "firebase/firestore";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
+    import { getAnalytics } from "firebase/analytics";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLiyxlQNcBXH9WkrJlZKhE7XwTWf_8rCA",
+        authDomain: "poutry-569e6.firebaseapp.com",
+        projectId: "poutry-569e6",
+        storageBucket: "poutry-569e6.firebasestorage.app",
+        messagingSenderId: "297732089999",
+        appId: "1:297732089999:web:47543c3e2b4d28d84de8fa",
+        measurementId: "G-93DWQEWQ1J"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Global state
+    let currentUser = null;
+    let currentDaily = [], currentSales = [], currentExpenses = [];
+    let dailyUnsubscribe, salesUnsubscribe, expensesUnsubscribe;
+    let currentChart = null;
+
+    // Helper functions
+    function showToast(msg, isError = false) {
+        const toast = document.createElement("div");
+        toast.className = `toast-message ${isError ? 'bg-red-700' : 'bg-gray-800'}`;
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+    }
+
+    // Get user-specific collection reference
+    function getUserDailyCol() { return collection(db, "users", currentUser.uid, "dailyProduction"); }
+    function getUserSalesCol() { return collection(db, "users", currentUser.uid, "salesLog"); }
+    function getUserExpensesCol() { return collection(db, "users", currentUser.uid, "expensesLog"); }
+    function getUserFlockDoc() { return doc(db, "users", currentUser.uid, "config", "flockSettings"); }
+
+    // Render functions
+    function renderDailyTable(data) {
+        const tbody = document.getElementById("dailyTableBody");
+        if (!tbody) return;
+        const sorted = [...data].sort((a,b) => new Date(b.date) - new Date(a.date));
+        if (sorted.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center p-4 text-gray-400">No records</td></tr>'; return; }
+        tbody.innerHTML = sorted.map(entry => {
+            const goodEggs = (entry.eggsCollected || 0) - (entry.damagedEggs || 0);
+            const layingRate = entry.activeBirds ? ((entry.eggsCollected / entry.activeBirds)*100).toFixed(1) : 0;
+            return `<tr class="border-b"><td class="p-2">${entry.date}</td><td>${entry.activeBirds}</td><td>${entry.eggsCollected}</td><td>${entry.damagedEggs||0}</td><td>${goodEggs}</td><td>${layingRate}%</td><td>${entry.feedKg}</td><td>${entry.mortality||0}</td><td><button class="text-red-500 delete-daily" data-id="${entry.id}"><i class="fas fa-trash"></i></button></td></tr>`;
+        }).join("");
+        document.querySelectorAll(".delete-daily").forEach(btn => btn.addEventListener("click", async (e) => {
+            await deleteDoc(doc(db, "users", currentUser.uid, "dailyProduction", btn.getAttribute("data-id")));
+            showToast("Deleted");
+        }));
+    }
+
+    function renderSalesTable(data) {
+        const tbody = document.getElementById("salesTableBody");
+        const sorted = [...data].sort((a,b)=>new Date(b.date)-new Date(a.date));
+        if(sorted.length===0){ tbody.innerHTML='<tr><td colspan="8" class="text-center p-4">No sales</td></tr>'; return; }
+        tbody.innerHTML = sorted.map(s => `<tr class="border-b"><td class="p-2">${s.date}</td><td>${s.itemType}</td><td>${s.quantity}</td><td>${s.unitPrice}</td><td>${s.total}</td><td>${s.customer || '-'}</td><td>${s.paymentStatus}</td><td><button class="text-red-500 delete-sale" data-id="${s.id}"><i class="fas fa-trash"></i></button></td></tr>`).join("");
+        document.querySelectorAll(".delete-sale").forEach(btn => btn.addEventListener("click", async () => { await deleteDoc(doc(db, "users", currentUser.uid, "salesLog", btn.getAttribute("data-id"))); }));
+    }
+
+    function renderExpensesTable(data) {
+        const tbody = document.getElementById("expensesTableBody");
+        const sorted = [...data].sort((a,b)=>new Date(b.date)-new Date(a.date));
+        if(sorted.length===0){ tbody.innerHTML='<tr><td colspan="6" class="text-center p-4">No expenses</td></tr>'; return; }
+        tbody.innerHTML = sorted.map(e => `<tr class="border-b"><td class="p-2">${e.date}</td><td>${e.category}</td><td>${e.description || ''}</td><td>${e.quantity}</td><td>${e.totalCost}</td><td><button class="text-red-500 delete-exp" data-id="${e.id}"><i class="fas fa-trash"></i></button></td></tr>`).join("");
+        document.querySelectorAll(".delete-exp").forEach(btn => btn.addEventListener("click", async () => { await deleteDoc(doc(db, "users", currentUser.uid, "expensesLog", btn.getAttribute("data-id"))); }));
+    }
+
+    async function refreshDashboard() {
+        if (!currentUser) return;
+        const monthTarget = document.getElementById("dashboardMonth").value;
+        const [year, month] = monthTarget.split("-");
+        const startDate = `${year}-${month}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${lastDay}`;
+        
+        const filteredDaily = currentDaily.filter(d => d.date >= startDate && d.date <= endDate);
+        const filteredSales = currentSales.filter(s => s.date >= startDate && s.date <= endDate);
+        const filteredExpenses = currentExpenses.filter(e => e.date >= startDate && e.date <= endDate);
+        
+        const totalEggs = filteredDaily.reduce((sum, d) => sum + (d.eggsCollected || 0), 0);
+        const totalFeed = filteredDaily.reduce((sum, d) => sum + (d.feedKg || 0), 0);
+        const totalMortality = filteredDaily.reduce((sum, d) => sum + (d.mortality || 0), 0);
+        let rateSum = 0;
+        filteredDaily.forEach(d => { if(d.activeBirds) rateSum += (d.eggsCollected / d.activeBirds) * 100; });
+        const avgLayingRate = filteredDaily.length ? (rateSum / filteredDaily.length).toFixed(1) : 0;
+        const grossRevenue = filteredSales.reduce((sum, s) => sum + (s.total || (s.quantity * s.unitPrice)), 0);
+        const totalExpense = filteredExpenses.reduce((sum, e) => sum + (e.totalCost || 0), 0);
+        const netProfit = grossRevenue - totalExpense;
+        
+        document.getElementById("kpiTotalEggs").innerText = totalEggs;
+        document.getElementById("kpiFeedUsed").innerText = totalFeed.toFixed(1);
+        document.getElementById("kpiLayingRate").innerHTML = `${avgLayingRate}%`;
+        document.getElementById("kpiMortality").innerText = totalMortality;
+        document.getElementById("financeRevenue").innerHTML = `KES ${grossRevenue.toLocaleString()}`;
+        document.getElementById("financeExpenses").innerHTML = `KES ${totalExpense.toLocaleString()}`;
+        const profitElem = document.getElementById("financeProfit");
+        profitElem.innerHTML = `KES ${netProfit.toLocaleString()}`;
+        profitElem.className = `text-2xl font-bold ${netProfit >=0 ? "text-green-700" : "text-red-600"}`;
+        
+        const last14 = [...filteredDaily].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-14);
+        const ctx = document.getElementById('eggTrendChart').getContext('2d');
+        if (currentChart) currentChart.destroy();
+        currentChart = new Chart(ctx, { type: 'line', data: { labels: last14.map(d=>d.date.slice(5)), datasets: [{ label: 'Eggs Collected', data: last14.map(d=>d.eggsCollected), borderColor: '#15803d', tension: 0.2, fill: false }] } });
+    }
+
+    function startFirestoreListeners() {
+        if (dailyUnsubscribe) dailyUnsubscribe();
+        dailyUnsubscribe = onSnapshot(query(getUserDailyCol(), orderBy("date", "desc")), (snapshot) => {
+            currentDaily = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderDailyTable(currentDaily);
+            refreshDashboard();
+        });
+        salesUnsubscribe = onSnapshot(query(getUserSalesCol(), orderBy("date", "desc")), (snapshot) => {
+            currentSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderSalesTable(currentSales);
+            refreshDashboard();
+        });
+        expensesUnsubscribe = onSnapshot(query(getUserExpensesCol(), orderBy("date", "desc")), (snapshot) => {
+            currentExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderExpensesTable(currentExpenses);
+            refreshDashboard();
+        });
+    }
+
+    async function loadFlockSettings() {
+        const docRef = getUserFlockDoc();
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            document.getElementById("flockName").value = snap.data().flockName || "My Flock";
+            document.getElementById("birdType").value = snap.data().birdType || "Layers";
+        } else {
+            await setDoc(docRef, { flockName: "My Flock", birdType: "Layers" });
+        }
+    }
+
+    // Event handlers
+    document.getElementById("addDailyEntry")?.addEventListener("click", async () => {
+        await addDoc(getUserDailyCol(), {
+            date: document.getElementById("dailyDate").value,
+            activeBirds: parseInt(document.getElementById("activeBirds").value),
+            eggsCollected: parseInt(document.getElementById("eggsCollected").value),
+            damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0,
+            feedKg: parseFloat(document.getElementById("feedKg").value),
+            mortality: parseInt(document.getElementById("mortalityCount").value),
+            timestamp: new Date().toISOString()
+        });
+        showToast("Daily record saved");
+    });
+    document.getElementById("addSaleBtn")?.addEventListener("click", async () => {
+        const qty = parseFloat(document.getElementById("saleQuantity").value);
+        const price = parseFloat(document.getElementById("saleUnitPrice").value);
+        await addDoc(getUserSalesCol(), {
+            date: document.getElementById("saleDate").value,
+            itemType: document.getElementById("saleItemType").value,
+            quantity: qty, unitPrice: price, total: qty * price,
+            customer: document.getElementById("customerProfile").value,
+            paymentStatus: document.getElementById("paymentStatus").value,
+            timestamp: new Date().toISOString()
+        });
+        showToast("Sale recorded");
+    });
+    document.getElementById("addExpenseBtn")?.addEventListener("click", async () => {
+        await addDoc(getUserExpensesCol(), {
+            date: document.getElementById("expenseDate").value,
+            category: document.getElementById("expenseCategory").value,
+            description: document.getElementById("expenseDesc").value,
+            quantity: parseFloat(document.getElementById("expenseQty").value),
+            totalCost: parseFloat(document.getElementById("expenseTotalCost").value),
+            timestamp: new Date().toISOString()
+        });
+        showToast("Expense added");
+    });
+    document.getElementById("updateFlockBtn")?.addEventListener("click", async () => {
+        await setDoc(getUserFlockDoc(), { flockName: document.getElementById("flockName").value, birdType: document.getElementById("birdType").value });
+        showToast("Flock updated");
+    });
+    document.getElementById("seedDemoBtn")?.addEventListener("click", async () => {
+        await addDoc(getUserDailyCol(), { date: "2026-06-01", activeBirds: 500, eggsCollected: 445, damagedEggs: 8, feedKg: 72, mortality: 1, timestamp: new Date().toISOString() });
+        await addDoc(getUserDailyCol(), { date: "2026-06-05", activeBirds: 498, eggsCollected: 460, damagedEggs: 4, feedKg: 69.8, mortality: 1, timestamp: new Date().toISOString() });
+        showToast("Demo data added");
+    });
+    document.getElementById("exportReportBtn")?.addEventListener("click", () => {
+        const data = { daily: currentDaily, sales: currentSales, expenses: currentExpenses };
+        const blob = new Blob([JSON.stringify(data, null,2)], {type:"application/json"});
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "poultry_report.json"; a.click();
+    });
+    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); });
+
+    // Tab switching
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("tab-active"));
+            btn.classList.add("tab-active");
+            const target = btn.getAttribute("data-tab");
+            document.querySelectorAll(".tab-content").forEach(sec => sec.classList.add("hidden"));
+            document.getElementById(`${target}-section`).classList.remove("hidden");
+            if (target === "flock") loadFlockSettings();
+        });
+    });
+    document.getElementById("dashboardMonth")?.addEventListener("change", () => refreshDashboard());
+
+    // Auth handlers
+    document.getElementById("loginBtn")?.addEventListener("click", async () => {
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            showToast("Login successful!");
+        } catch(e) { showToast(e.message, true); }
+    });
+    document.getElementById("registerBtn")?.addEventListener("click", async () => {
+        const name = document.getElementById("regName").value;
+        const email = document.getElementById("regEmail").value;
+        const password = document.getElementById("regPassword").value;
+        const confirm = document.getElementById("regConfirmPassword").value;
+        if (password !== confirm) { showToast("Passwords do not match", true); return; }
+        try {
+            const cred = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(cred.user, { displayName: name });
+            showToast("Account created! Welcome.");
+        } catch(e) { showToast(e.message, true); }
+    });
+    document.getElementById("showRegisterBtn")?.addEventListener("click", () => {
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("registerForm").classList.remove("hidden");
+    });
+    document.getElementById("showLoginBtn")?.addEventListener("click", () => {
+        document.getElementById("registerForm").classList.add("hidden");
+        document.getElementById("loginForm").classList.remove("hidden");
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById("userEmailDisplay").innerHTML = `<i class="fas fa-user-circle mr-1"></i> ${user.email}`;
+            document.getElementById("authModal").classList.add("hidden");
+            document.getElementById("mainApp").classList.remove("hidden");
+            startFirestoreListeners();
+            await loadFlockSettings();
+        } else {
+            currentUser = null;
+            if (dailyUnsubscribe) dailyUnsubscribe();
+            document.getElementById("authModal").classList.remove("hidden");
+            document.getElementById("mainApp").classList.add("hidden");
+            document.getElementById("loginEmail").value = "";
+            document.getElementById("loginPassword").value = "";
+        }
+    });
+</script>
+</body>
+</html>
