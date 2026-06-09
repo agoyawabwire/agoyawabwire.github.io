@@ -375,14 +375,10 @@
     }
 
     // Get user-specific collection reference
-    function ensureUser() {
-        if (!currentUser) throw new Error("User must be authenticated to access Firestore");
-    }
-
-    function getUserDailyCol() { ensureUser(); return collection(db, "users", currentUser.uid, "dailyProduction"); }
-    function getUserSalesCol() { ensureUser(); return collection(db, "users", currentUser.uid, "salesLog"); }
-    function getUserExpensesCol() { ensureUser(); return collection(db, "users", currentUser.uid, "expensesLog"); }
-    function getUserFlockDoc() { ensureUser(); return doc(db, "users", currentUser.uid, "config", "flockSettings"); }
+    function getUserDailyCol() { return collection(db, "users", currentUser.uid, "dailyProduction"); }
+    function getUserSalesCol() { return collection(db, "users", currentUser.uid, "salesLog"); }
+    function getUserExpensesCol() { return collection(db, "users", currentUser.uid, "expensesLog"); }
+    function getUserFlockDoc() { return doc(db, "users", currentUser.uid, "config", "flockSettings"); }
 
     // Render functions
     function renderDailyTable(data) {
@@ -455,14 +451,8 @@
         currentChart = new Chart(ctx, { type: 'line', data: { labels: last14.map(d=>d.date.slice(5)), datasets: [{ label: 'Eggs Collected', data: last14.map(d=>d.eggsCollected), borderColor: '#15803d', tension: 0.2, fill: false }] } });
     }
 
-    function cleanupFirestoreListeners() {
-        if (dailyUnsubscribe) { dailyUnsubscribe(); dailyUnsubscribe = null; }
-        if (salesUnsubscribe) { salesUnsubscribe(); salesUnsubscribe = null; }
-        if (expensesUnsubscribe) { expensesUnsubscribe(); expensesUnsubscribe = null; }
-    }
-
     function startFirestoreListeners() {
-        cleanupFirestoreListeners();
+        if (dailyUnsubscribe) dailyUnsubscribe();
         dailyUnsubscribe = onSnapshot(query(getUserDailyCol(), orderBy("date", "desc")), (snapshot) => {
             currentDaily = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderDailyTable(currentDaily);
@@ -542,14 +532,7 @@
         const blob = new Blob([JSON.stringify(data, null,2)], {type:"application/json"});
         const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "poultry_report.json"; a.click();
     });
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-        await signOut(auth);
-        cleanupFirestoreListeners();
-        currentDaily = [];
-        currentSales = [];
-        currentExpenses = [];
-        if (currentChart) { currentChart.destroy(); currentChart = null; }
-    });
+    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); });
 
     // Tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -604,8 +587,7 @@
             await loadFlockSettings();
         } else {
             currentUser = null;
-            cleanupFirestoreListeners();
-            if (currentChart) { currentChart.destroy(); currentChart = null; }
+            if (dailyUnsubscribe) dailyUnsubscribe();
             document.getElementById("authModal").classList.remove("hidden");
             document.getElementById("mainApp").classList.add("hidden");
             document.getElementById("loginEmail").value = "";
