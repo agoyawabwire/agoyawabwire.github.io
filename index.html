@@ -41,7 +41,16 @@
             border: none;
         }
         .btn-primary:hover { background: linear-gradient(135deg, #166534 0%, #14532d 100%); transform: scale(1.02); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-secondary:hover { background: #d1d5db; }
         .tab-active {
             border-bottom: 3px solid #15803d;
             color: #15803d;
@@ -129,7 +138,6 @@
             border-radius: 8px;
             font-size: 0.75rem;
             cursor: pointer;
-            margin-left: 10px;
         }
         .refresh-btn:hover { background: #e5e7eb; }
         
@@ -151,24 +159,28 @@
         tr:hover {
             background-color: #f9fafb;
         }
-        .delete-btn {
+        .user-selector {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            min-width: 200px;
+        }
+        .admin-data-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        .admin-data-tab {
+            padding: 8px 16px;
             cursor: pointer;
-            color: #ef4444;
-            transition: color 0.2s;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
-        .delete-btn:hover { color: #dc2626; transform: scale(1.1); display: inline-block; }
-        
-        /* Loading state */
-        .loading-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 4px;
-        }
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        .admin-data-tab:hover { background: #f3f4f6; }
+        .admin-data-tab.active { background: #15803d; color: white; }
     </style>
 </head>
 <body>
@@ -347,20 +359,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b">
-                        <th class="p-3 text-left">Date</th>
-                        <th class="p-3 text-left">Active Birds</th>
-                        <th class="p-3 text-left">Eggs</th>
-                        <th class="p-3 text-left">Damaged</th>
-                        <th class="p-3 text-left">Good Eggs</th>
-                        <th class="p-3 text-left">Laying Rate</th>
-                        <th class="p-3 text-left">Feed(kg)</th>
-                        <th class="p-3 text-left">Mortality</th>
-                        <th class="p-3 text-left">Action</th>
-                    <tr>
+                        <th class="p-3 text-left">Date</th><th class="p-3 text-left">Active Birds</th><th class="p-3 text-left">Eggs</th><th class="p-3 text-left">Damaged</th>
+                        <th class="p-3 text-left">Good Eggs</th><th class="p-3 text-left">Laying Rate</th><th class="p-3 text-left">Feed(kg)</th>
+                        <th class="p-3 text-left">Mortality</th><th class="p-3 text-left">Action</th>
+                    </tr>
                 </thead>
-                <tbody id="dailyTableBody">
-                    <tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>
-                </tbody>
+                <tbody id="dailyTableBody"><table><td colspan="9" class="text-center p-8 text-gray-400">No records yet</tr></tbody>
             </table>
         </div>
     </div>
@@ -380,24 +384,9 @@
             <button id="addSaleBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Sale</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3 text-left">Date</th>
-                        <th class="p-3 text-left">Item Type</th>
-                        <th class="p-3 text-left">Quantity</th>
-                        <th class="p-3 text-left">Unit Price</th>
-                        <th class="p-3 text-left">Total (KES)</th>
-                        <th class="p-3 text-left">Customer</th>
-                        <th class="p-3 text-left">Status</th>
-                        <th class="p-3 text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="salesTableBody">
-                    <tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Item Type</th><th>Quantity</th><th>Unit Price</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="salesTableBody"><tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</tr></tbody>
+        </table></div>
     </div>
 
     <!-- EXPENSES -->
@@ -414,102 +403,107 @@
             <button id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3 text-left">Date</th>
-                        <th class="p-3 text-left">Category</th>
-                        <th class="p-3 text-left">Description</th>
-                        <th class="p-3 text-left">Quantity</th>
-                        <th class="p-3 text-left">Total Cost (KES)</th>
-                        <th class="p-3 text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="expensesTableBody">
-                    <tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Category</th><th>Description</th><th>Quantity</th><th>Total Cost (KES)</th><th>Action</th></tr></thead>
+            <tbody id="expensesTableBody"><tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</tr></tbody>
+        </table></div>
     </div>
 
     <!-- FLOCK SETTINGS -->
     <div id="flock-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl mx-auto">
-            <div class="text-center mb-6">
-                <i class="fas fa-egg text-green-600 text-5xl"></i>
-                <h2 class="text-2xl font-bold mt-3">Flock Configuration</h2>
-                <p class="text-gray-500 text-sm">Manage your flock settings</p>
-            </div>
+            <div class="text-center mb-6"><i class="fas fa-egg text-green-600 text-5xl"></i><h2 class="text-2xl font-bold mt-3">Flock Configuration</h2></div>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Flock Name</label>
-                    <input type="text" id="flockName" class="w-full border rounded-lg p-2" placeholder="e.g., Batch A-2026">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bird Type</label>
-                    <select id="birdType" class="w-full border rounded-lg p-2">
-                        <option>Layers (Egg Production)</option>
-                        <option>Broilers (Meat Production)</option>
-                        <option>Dual Purpose</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Total Birds</label>
-                    <input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock" min="1">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Housing Type</label>
-                    <select id="housingType" class="w-full border rounded-lg p-2">
-                        <option>Free Range</option><option>Barn</option><option>Cage System</option><option>Pasture Raised</option>
-                    </select>
-                </div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Flock Name</label><input type="text" id="flockName" class="w-full border rounded-lg p-2" placeholder="e.g., Batch A-2026"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Bird Type</label><select id="birdType" class="w-full border rounded-lg p-2"><option>Layers (Egg Production)</option><option>Broilers (Meat Production)</option><option>Dual Purpose</option></select></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Birds</label><input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock" min="1"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Housing Type</label><select id="housingType" class="w-full border rounded-lg p-2"><option>Free Range</option><option>Barn</option><option>Cage System</option><option>Pasture Raised</option></select></div>
                 <button id="updateFlockBtn" class="btn-primary w-full py-3"><i class="fas fa-save mr-2"></i> Save Settings</button>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN PANEL -->
+    <!-- ADMIN PANEL - Now with User Data Viewing -->
     <div id="admin-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                 <h2 class="text-2xl font-bold"><i class="fas fa-crown text-yellow-500 mr-2"></i>Admin Dashboard</h2>
                 <button id="refreshAdminBtn" class="refresh-btn"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
             </div>
             
+            <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                <div class="bg-purple-50 rounded-xl p-5 text-center">
-                    <i class="fas fa-users text-purple-600 text-3xl mb-2"></i>
-                    <h3 class="text-2xl font-bold" id="totalUsers">0</h3>
-                    <p class="text-gray-600 text-sm">Total Users</p>
-                </div>
-                <div class="bg-blue-50 rounded-xl p-5 text-center">
-                    <i class="fas fa-database text-blue-600 text-3xl mb-2"></i>
-                    <h3 class="text-2xl font-bold" id="totalRecords">0</h3>
-                    <p class="text-gray-600 text-sm">Total Records</p>
-                </div>
-                <div class="bg-green-50 rounded-xl p-5 text-center">
-                    <i class="fas fa-chart-line text-green-600 text-3xl mb-2"></i>
-                    <h3 class="text-2xl font-bold" id="activeUsers">0</h3>
-                    <p class="text-gray-600 text-sm">Active Users</p>
+                <div class="bg-purple-50 rounded-xl p-5 text-center"><i class="fas fa-users text-purple-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="totalUsers">0</h3><p class="text-gray-600 text-sm">Total Users</p></div>
+                <div class="bg-blue-50 rounded-xl p-5 text-center"><i class="fas fa-database text-blue-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="totalRecords">0</h3><p class="text-gray-600 text-sm">Total Records</p></div>
+                <div class="bg-green-50 rounded-xl p-5 text-center"><i class="fas fa-chart-line text-green-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="activeUsers">0</h3><p class="text-gray-600 text-sm">Active Users</p></div>
+            </div>
+            
+            <!-- User Selector for Viewing Data -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="text-lg font-semibold mb-3"><i class="fas fa-eye mr-2"></i>View User Data</h3>
+                <div class="flex flex-wrap gap-4 items-end">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select User</label>
+                        <select id="adminUserSelector" class="w-full border rounded-lg p-2">
+                            <option value="">-- Select a user to view their data --</option>
+                        </select>
+                    </div>
+                    <button id="loadUserDataBtn" class="btn-primary px-4 py-2">
+                        <i class="fas fa-chart-line mr-2"></i>Load User Data
+                    </button>
                 </div>
             </div>
             
-            <h3 class="text-xl font-semibold mb-4">All Registered Users</h3>
+            <!-- Selected User Data Display -->
+            <div id="selectedUserData" class="hidden">
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold text-lg mb-2"><i class="fas fa-user mr-2"></i>User Details</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div><span class="font-medium">Email:</span> <span id="viewUserEmail">-</span></div>
+                        <div><span class="font-medium">Farm Name:</span> <span id="viewUserFarm">-</span></div>
+                        <div><span class="font-medium">Joined:</span> <span id="viewUserJoined">-</span></div>
+                        <div><span class="font-medium">Total Records:</span> <span id="viewUserTotalRecords">0</span></div>
+                    </div>
+                </div>
+                
+                <!-- User Data Tabs -->
+                <div class="admin-data-tabs">
+                    <button class="admin-data-tab active" data-user-tab="daily">📋 Daily Production</button>
+                    <button class="admin-data-tab" data-user-tab="sales">💰 Sales</button>
+                    <button class="admin-data-tab" data-user-tab="expenses">📉 Expenses</button>
+                </div>
+                
+                <!-- Daily Production Table for Selected User -->
+                <div id="userDailyTable" class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead><tr class="bg-gray-50 border-b"><th class="p-2">Date</th><th>Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed(kg)</th><th>Mortality</th></tr></thead>
+                        <tbody id="userDailyTableBody"><tr><td colspan="8" class="text-center p-4 text-gray-400">Select a user to view data</tr></tbody>
+                    
+    
+                </div>
+                
+                <!-- Sales Table for Selected User -->
+                <div id="userSalesTable" class="overflow-x-auto hidden">
+                    <table class="min-w-full text-sm">
+                        <thead><tr class="bg-gray-50 border-b"><th class="p-2">Date</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Customer</th><th>Status</th></tr></thead>
+                        <tbody id="userSalesTableBody"><tr><td colspan="7" class="text-center p-4 text-gray-400">Select a user to view data</tr></tbody>
+                    ……
+                </div>
+                
+                <!-- Expenses Table for Selected User -->
+                <div id="userExpensesTable" class="overflow-x-auto hidden">
+                    <table class="min-w-full text-sm">
+                        <thead><tr class="bg-gray-50 border-b"><th class="p-2">Date</th><th>Category</th><th>Description</th><th>Qty</th><th>Total Cost</th></tr></thead>
+                        <tbody id="userExpensesTableBody"><tr><td colspan="5" class="text-center p-4 text-gray-400">Select a user to view data</tr></tbody>
+                    ……
+                </div>
+            </div>
+            
+            <!-- All Users List -->
+            <h3 class="text-xl font-semibold mb-4 mt-8">All Registered Users</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead>
-                        <tr class="bg-gray-50 border-b">
-                            <th class="p-3 text-left">Email</th>
-                            <th class="p-3 text-left">Full Name</th>
-                            <th class="p-3 text-left">Farm Name</th>
-                            <th class="p-3 text-left">Role</th>
-                            <th class="p-3 text-left">Joined Date</th>
-                            <th class="p-3 text-left">Records</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminUsersTableBody">
-                        <tr><td colspan="6" class="text-center p-8 text-gray-400">Loading users...</td></tr>
-                    </tbody>
+                    <thead><tr class="bg-gray-50 border-b"><th class="p-3 text-left">Email</th><th>Full Name</th><th>Farm Name</th><th>Role</th><th>Joined</th><th>Records</th><th>Action</th></tr></thead>
+                    <tbody id="adminUsersTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -540,6 +534,7 @@
     let currentDaily = [], currentSales = [], currentExpenses = [];
     let currentChart = null;
     let redirectTimer = null;
+    let allUsersCache = [];
 
     const ADMIN_EMAILS = ["admin@poultryflow.com", "bit003623@student.kibu.ac.ke"];
 
@@ -557,9 +552,7 @@
             errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${msg}`;
             errorDiv.classList.remove("hidden");
             setTimeout(() => errorDiv.classList.add("hidden"), 5000);
-        } else {
-            showToast(msg, true);
-        }
+        } else { showToast(msg, true); }
     }
 
     function showSuccessModalWithRedirect(message, redirectToDashboard = true) {
@@ -575,7 +568,6 @@
                 countdownDiv.classList.remove("hidden");
                 let seconds = 3;
                 countdownSpan.textContent = seconds;
-                
                 if (redirectTimer) clearInterval(redirectTimer);
                 redirectTimer = setInterval(() => {
                     seconds--;
@@ -585,38 +577,27 @@
                         modal.classList.add("hidden");
                         countdownDiv.classList.add("hidden");
                         document.querySelectorAll(".tab-btn").forEach(btn => {
-                            if (btn.getAttribute("data-tab") === "dashboard") {
-                                btn.click();
-                            }
+                            if (btn.getAttribute("data-tab") === "dashboard") btn.click();
                         });
                     }
                 }, 1000);
             }
         } else {
-            const countdownDiv = document.getElementById("redirectCountdown");
-            if (countdownDiv) countdownDiv.classList.add("hidden");
+            document.getElementById("redirectCountdown")?.classList.add("hidden");
         }
-        
         modal.classList.remove("hidden");
         
         document.getElementById("closeSuccessModal").onclick = () => {
             if (redirectTimer) clearInterval(redirectTimer);
             modal.classList.add("hidden");
-            if (document.getElementById("redirectCountdown")) {
-                document.getElementById("redirectCountdown").classList.add("hidden");
-            }
+            document.getElementById("redirectCountdown")?.classList.add("hidden");
             if (redirectToDashboard) {
                 document.querySelectorAll(".tab-btn").forEach(btn => {
-                    if (btn.getAttribute("data-tab") === "dashboard") {
-                        btn.click();
-                    }
+                    if (btn.getAttribute("data-tab") === "dashboard") btn.click();
                 });
             }
         };
-        
-        if (!redirectToDashboard) {
-            setTimeout(() => modal.classList.add("hidden"), 3000);
-        }
+        if (!redirectToDashboard) setTimeout(() => modal.classList.add("hidden"), 3000);
     }
 
     function resetDailyForm() {
@@ -663,95 +644,31 @@
     function renderDailyTable() {
         const tbody = document.getElementById("dailyTableBody");
         if (!tbody) return;
-        if (currentDaily.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td><tr>';
-            return; 
-        }
+        if (currentDaily.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>'; return; }
         const sorted = [...currentDaily].sort((a,b) => new Date(b.date) - new Date(a.date));
         tbody.innerHTML = sorted.map(entry => {
             const goodEggs = (entry.eggsCollected || 0) - (entry.damagedEggs || 0);
             const layingRate = entry.activeBirds && entry.activeBirds > 0 ? ((entry.eggsCollected / entry.activeBirds) * 100).toFixed(1) : 0;
-            let rateColor = '';
-            if (layingRate >= 70) rateColor = 'text-green-600';
-            else if (layingRate >= 50) rateColor = 'text-yellow-600';
-            else rateColor = 'text-red-600';
-            return `<tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${entry.date}</td>
-                        <td class="p-3">${entry.activeBirds}</td>
-                        <td class="p-3">${entry.eggsCollected}</td>
-                        <td class="p-3 text-red-600">${entry.damagedEggs||0}</td>
-                        <td class="p-3 text-green-600 font-semibold">${goodEggs}</td>
-                        <td class="p-3 ${rateColor} font-semibold">${layingRate}%</td>
-                        <td class="p-3">${entry.feedKg||0}</td>
-                        <td class="p-3 text-red-600">${entry.mortality||0}</td>
-                        <td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700 transition" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td>
-                     </tr>`;
+            let rateColor = layingRate >= 70 ? 'text-green-600' : (layingRate >= 50 ? 'text-yellow-600' : 'text-red-600');
+            return `<tr class="border-b hover:bg-gray-50"><td class="p-3">${entry.date}</td><td class="p-3">${entry.activeBirds}</td><td class="p-3">${entry.eggsCollected}</td><td class="p-3 text-red-600">${entry.damagedEggs||0}</td><td class="p-3 text-green-600 font-semibold">${goodEggs}</td><td class="p-3 ${rateColor} font-semibold">${layingRate}%</td><td class="p-3">${entry.feedKg||0}</td><td class="p-3 text-red-600">${entry.mortality||0}</td><td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td></tr>`;
         }).join('');
-        
-        document.querySelectorAll(".delete-daily").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if(confirm("Delete this record?")) {
-                    await remove(ref(db, `users/${currentUser.uid}/dailyProduction/${btn.dataset.id}`));
-                    showToast("Record deleted");
-                }
-            });
-        });
+        document.querySelectorAll(".delete-daily").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this record?")) { await remove(ref(db, `users/${currentUser.uid}/dailyProduction/${btn.dataset.id}`)); showToast("Record deleted"); } }));
     }
 
     function renderSalesTable() {
         const tbody = document.getElementById("salesTableBody");
-        if (!tbody) return;
-        if (currentSales.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td><tr>';
-            return; 
-        }
+        if (currentSales.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td><tr>'; return; }
         const sorted = [...currentSales].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(s => `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3">${s.date}</td>
-                    <td class="p-3">${s.itemType}</td>
-                    <td class="p-3">${s.quantity}</td>
-                    <td class="p-3">KES ${s.unitPrice}</td>
-                    <td class="p-3 text-green-600 font-semibold">KES ${s.total}</td>
-                    <td class="p-3">${s.customer || '-'}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td>
-                    <td class="p-3"><button class="delete-sale text-red-500 hover:text-red-700 transition" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
-                 </tr>`).join('');
-        
-        document.querySelectorAll(".delete-sale").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if(confirm("Delete this sale?")) {
-                    await remove(ref(db, `users/${currentUser.uid}/salesLog/${btn.dataset.id}`));
-                    showToast("Sale deleted");
-                }
-            });
-        });
+        tbody.innerHTML = sorted.map(s => `<tr class="border-b hover:bg-gray-50"><td class="p-3">${s.date}</td><td class="p-3">${s.itemType}</td><td class="p-3">${s.quantity}</td><td class="p-3">KES ${s.unitPrice}</td><td class="p-3 text-green-600 font-semibold">KES ${s.total}</td><td class="p-3">${s.customer || '-'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td><td class="p-3"><button class="delete-sale text-red-500" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+        document.querySelectorAll(".delete-sale").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this sale?")) { await remove(ref(db, `users/${currentUser.uid}/salesLog/${btn.dataset.id}`)); showToast("Sale deleted"); } }));
     }
 
     function renderExpensesTable() {
         const tbody = document.getElementById("expensesTableBody");
-        if (!tbody) return;
-        if (currentExpenses.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td><tr>';
-            return; 
-        }
+        if (currentExpenses.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>'; return; }
         const sorted = [...currentExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(e => `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3">${e.date}</td>
-                    <td class="p-3">${e.category}</td>
-                    <td class="p-3">${e.description || '-'}</td>
-                    <td class="p-3">${e.quantity}</td>
-                    <td class="p-3 text-red-600 font-semibold">KES ${e.totalCost}</td>
-                    <td class="p-3"><button class="delete-exp text-red-500 hover:text-red-700 transition" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td>
-                 </tr>`).join('');
-        
-        document.querySelectorAll(".delete-exp").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if(confirm("Delete this expense?")) {
-                    await remove(ref(db, `users/${currentUser.uid}/expensesLog/${btn.dataset.id}`));
-                    showToast("Expense deleted");
-                }
-            });
-        });
+        tbody.innerHTML = sorted.map(e => `<tr class="border-b hover:bg-gray-50"><td class="p-3">${e.date}</td><td class="p-3">${e.category}</td><td class="p-3">${e.description || '-'}</td><td class="p-3">${e.quantity}</td><td class="p-3 text-red-600 font-semibold">KES ${e.totalCost}</td><td class="p-3"><button class="delete-exp text-red-500" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+        document.querySelectorAll(".delete-exp").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this expense?")) { await remove(ref(db, `users/${currentUser.uid}/expensesLog/${btn.dataset.id}`)); showToast("Expense deleted"); } }));
     }
 
     async function refreshDashboard() {
@@ -763,11 +680,9 @@
         const totalEggs = filteredDaily.reduce((s,d) => s + (d.eggsCollected || 0), 0);
         const totalFeed = filteredDaily.reduce((s,d) => s + (d.feedKg || 0), 0);
         const totalMortality = filteredDaily.reduce((s,d) => s + (d.mortality || 0), 0);
-        
         let rateSum = 0, rateCount = 0;
         filteredDaily.forEach(d => { if(d.activeBirds && d.activeBirds > 0) { rateSum += (d.eggsCollected / d.activeBirds) * 100; rateCount++; } });
         const avgRate = rateCount > 0 ? (rateSum / rateCount).toFixed(1) : 0;
-        
         const revenue = filteredSales.reduce((s,item) => s + (item.total || 0), 0);
         const expense = filteredExpenses.reduce((s,e) => s + (e.totalCost || 0), 0);
         const profit = revenue - expense;
@@ -786,70 +701,48 @@
         const ctx = document.getElementById('eggTrendChart')?.getContext('2d');
         if (ctx) {
             if (currentChart) currentChart.destroy();
-            currentChart = new Chart(ctx, { 
-                type: 'line', 
-                data: { 
-                    labels: last14.map(d=>d.date ? d.date.slice(5) : ''), 
-                    datasets: [{ 
-                        label: 'Eggs Collected', 
-                        data: last14.map(d=>d.eggsCollected), 
-                        borderColor: '#15803d', 
-                        backgroundColor: 'rgba(21,128,61,0.1)',
-                        tension: 0.3, 
-                        fill: true 
-                    }] 
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'top' }
-                    }
-                }
-            });
+            currentChart = new Chart(ctx, { type: 'line', data: { labels: last14.map(d=>d.date ? d.date.slice(5) : ''), datasets: [{ label: 'Eggs Collected', data: last14.map(d=>d.eggsCollected), borderColor: '#15803d', backgroundColor: 'rgba(21,128,61,0.1)', tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
         }
     }
 
     function startRealtimeListeners() {
-        const dailyRef = getUserDailyRef();
-        onValue(dailyRef, (snapshot) => {
-            const data = snapshot.val();
-            currentDaily = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
-            renderDailyTable();
-            refreshDashboard();
-        });
-        
-        const salesRef = getUserSalesRef();
-        onValue(salesRef, (snapshot) => {
-            const data = snapshot.val();
-            currentSales = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
-            renderSalesTable();
-            refreshDashboard();
-        });
-        
-        const expensesRef = getUserExpensesRef();
-        onValue(expensesRef, (snapshot) => {
-            const data = snapshot.val();
-            currentExpenses = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
-            renderExpensesTable();
-            refreshDashboard();
-        });
+        onValue(getUserDailyRef(), (snapshot) => { currentDaily = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderDailyTable(); refreshDashboard(); });
+        onValue(getUserSalesRef(), (snapshot) => { currentSales = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderSalesTable(); refreshDashboard(); });
+        onValue(getUserExpensesRef(), (snapshot) => { currentExpenses = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderExpensesTable(); refreshDashboard(); });
     }
 
     async function loadFlockSettings() {
-        try {
-            const flockRef = getUserFlockRef();
-            const snapshot = await get(flockRef);
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                document.getElementById("flockName").value = data.flockName || "";
-                document.getElementById("birdType").value = data.birdType || "Layers (Egg Production)";
-                document.getElementById("totalBirds").value = data.totalBirds || "";
-                document.getElementById("housingType").value = data.housingType || "Free Range";
-            }
-        } catch (error) { 
-            console.error("Error loading flock:", error);
-        }
+        try { const snapshot = await get(getUserFlockRef()); if (snapshot.exists()) { const data = snapshot.val(); document.getElementById("flockName").value = data.flockName || ""; document.getElementById("birdType").value = data.birdType || "Layers (Egg Production)"; document.getElementById("totalBirds").value = data.totalBirds || ""; document.getElementById("housingType").value = data.housingType || "Free Range"; } } catch(e) { console.error(e); }
+    }
+
+    // Admin function to load user data
+    async function loadUserDataForAdmin(userId, userEmail, userFarmName, userJoined) {
+        document.getElementById("viewUserEmail").innerText = userEmail;
+        document.getElementById("viewUserFarm").innerText = userFarmName;
+        document.getElementById("viewUserJoined").innerText = userJoined;
+        
+        // Load Daily Production
+        const dailySnapshot = await get(ref(db, `users/${userId}/dailyProduction`));
+        const dailyData = dailySnapshot.val() ? Object.entries(dailySnapshot.val()).map(([id, value]) => ({ id, ...value })) : [];
+        document.getElementById("userDailyTableBody").innerHTML = dailyData.length === 0 ? '<tr><td colspan="8" class="text-center p-4">No daily records</td></tr>' : dailyData.map(d => {
+            const goodEggs = (d.eggsCollected || 0) - (d.damagedEggs || 0);
+            const layingRate = d.activeBirds && d.activeBirds > 0 ? ((d.eggsCollected / d.activeBirds) * 100).toFixed(1) : 0;
+            return `<tr><td class="p-2">${d.date}</td><td>${d.activeBirds}</td><td>${d.eggsCollected}</td><td class="text-red-600">${d.damagedEggs||0}</td><td class="text-green-600">${goodEggs}</td><td>${layingRate}%</td><td>${d.feedKg||0}</td><td class="text-red-600">${d.mortality||0}</td></tr>`;
+        }).join('');
+        document.getElementById("userDailyTableBody").innerHTML = dailyData.map(d => { const goodEggs = (d.eggsCollected || 0) - (d.damagedEggs || 0); const layingRate = d.activeBirds && d.activeBirds > 0 ? ((d.eggsCollected / d.activeBirds) * 100).toFixed(1) : 0; return `<tr><td class="p-2">${d.date}</td><td>${d.activeBirds}</td><td>${d.eggsCollected}</td><td class="text-red-600">${d.damagedEggs||0}</td><td class="text-green-600">${goodEggs}</td><td>${layingRate}%</td><td>${d.feedKg||0}</td><td class="text-red-600">${d.mortality||0}</td></tr>`; }).join('');
+        document.getElementById("viewUserTotalRecords").innerText = dailyData.length;
+        
+        // Load Sales
+        const salesSnapshot = await get(ref(db, `users/${userId}/salesLog`));
+        const salesData = salesSnapshot.val() ? Object.entries(salesSnapshot.val()).map(([id, value]) => ({ id, ...value })) : [];
+        document.getElementById("userSalesTableBody").innerHTML = salesData.length === 0 ? '<tr><td colspan="7" class="text-center p-4">No sales records</td></tr>' : salesData.map(s => `<tr><td class="p-2">${s.date}</td><td>${s.itemType}</td><td>${s.quantity}</td><td>KES ${s.unitPrice}</td><td class="text-green-600">KES ${s.total}</td><td>${s.customer||'-'}</td><td><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td></tr>`).join('');
+        
+        // Load Expenses
+        const expensesSnapshot = await get(ref(db, `users/${userId}/expensesLog`));
+        const expensesData = expensesSnapshot.val() ? Object.entries(expensesSnapshot.val()).map(([id, value]) => ({ id, ...value })) : [];
+        document.getElementById("userExpensesTableBody").innerHTML = expensesData.length === 0 ? '<tr><td colspan="5" class="text-center p-4">No expense records</td></tr>' : expensesData.map(e => `<tr><td class="p-2">${e.date}</td><td>${e.category}</td><td>${e.description||'-'}</td><td>${e.quantity}</td><td class="text-red-600">KES ${e.totalCost}</td></tr>`).join('');
+        
+        document.getElementById("selectedUserData").classList.remove("hidden");
     }
 
     async function loadAdminPanel() {
@@ -868,22 +761,13 @@
                     let userFarmName = userData.farmName || "Not set";
                     let userRole = ADMIN_EMAILS.includes(userEmail) ? "admin" : "user";
                     let joinedDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "Unknown";
-                    
                     const dailyCount = userData.dailyProduction ? Object.keys(userData.dailyProduction).length : 0;
                     const salesCount = userData.salesLog ? Object.keys(userData.salesLog).length : 0;
                     const expensesCount = userData.expensesLog ? Object.keys(userData.expensesLog).length : 0;
                     const recordCount = dailyCount + salesCount + expensesCount;
                     totalRecords += recordCount;
                     if (recordCount > 0) activeCount++;
-                    
-                    usersList.push({ 
-                        email: userEmail, 
-                        fullName: userFullName,
-                        farmName: userFarmName, 
-                        role: userRole, 
-                        joined: joinedDate, 
-                        records: recordCount 
-                    });
+                    usersList.push({ uid, email: userEmail, fullName: userFullName, farmName: userFarmName, role: userRole, joined: joinedDate, records: recordCount });
                 }
             }
             
@@ -891,43 +775,44 @@
             document.getElementById("totalRecords").innerText = totalRecords;
             document.getElementById("activeUsers").innerText = activeCount;
             
+            const userSelector = document.getElementById("adminUserSelector");
+            userSelector.innerHTML = '<option value="">-- Select a user to view their data --</option>' + usersList.map(u => `<option value="${u.uid}" data-email="${u.email}" data-farm="${u.farmName}" data-joined="${u.joined}">${u.email} (${u.farmName})</option>`).join('');
+            allUsersCache = usersList;
+            
             const tbody = document.getElementById("adminUsersTableBody");
-            if (usersList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No users registered yet</td><tr>';
-            } else {
-                tbody.innerHTML = usersList.map(u => `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${escapeHtml(u.email)}</td>
-                        <td class="p-3">${escapeHtml(u.fullName)}</td>
-                        <td class="p-3">${escapeHtml(u.farmName)}</td>
-                        <td class="p-3"><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span></td>
-                        <td class="p-3">${u.joined}</td>
-                        <td class="p-3">${u.records} records</td>
-                     </tr>
-                `).join('');
-            }
-        } catch (error) { 
-            console.error("Admin panel error:", error);
-            document.getElementById("adminUsersTableBody").innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error loading users</td><tr>';
-        }
+            tbody.innerHTML = usersList.map(u => `<tr class="border-b hover:bg-gray-50"><td class="p-3">${u.email}</td><td>${u.fullName}</td><td>${u.farmName}</td><td><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span></td><td>${u.joined}</td><td>${u.records} records</td><td><button class="view-user-btn bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs" data-uid="${u.uid}" data-email="${u.email}" data-farm="${u.farmName}" data-joined="${u.joined}"><i class="fas fa-eye mr-1"></i>View Data</button></td></tr>`).join('');
+            
+            document.querySelectorAll(".view-user-btn").forEach(btn => {
+                btn.addEventListener("click", () => { loadUserDataForAdmin(btn.dataset.uid, btn.dataset.email, btn.dataset.farm, btn.dataset.joined); });
+            });
+        } catch (error) { console.error("Admin panel error:", error); }
     }
-    
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
+
+    document.getElementById("loadUserDataBtn")?.addEventListener("click", () => {
+        const selector = document.getElementById("adminUserSelector");
+        const selectedOption = selector.options[selector.selectedIndex];
+        if (selector.value) {
+            loadUserDataForAdmin(selector.value, selectedOption.dataset.email, selectedOption.dataset.farm, selectedOption.dataset.joined);
+        } else { showToast("Please select a user first", true); }
+    });
+
+    document.querySelectorAll(".admin-data-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".admin-data-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            const tabType = tab.dataset.userTab;
+            document.getElementById("userDailyTable").classList.add("hidden");
+            document.getElementById("userSalesTable").classList.add("hidden");
+            document.getElementById("userExpensesTable").classList.add("hidden");
+            document.getElementById(`user${tabType.charAt(0).toUpperCase() + tabType.slice(1)}Table`).classList.remove("hidden");
         });
-    }
+    });
 
     const today = new Date().toISOString().split('T')[0];
     document.getElementById("dailyDate").value = today;
     document.getElementById("saleDate").value = today;
     document.getElementById("expenseDate").value = today;
 
-    // Event Handlers with validation
     document.getElementById("addDailyEntry")?.addEventListener("click", async () => {
         const date = document.getElementById("dailyDate").value;
         const birds = parseInt(document.getElementById("activeBirds").value);
@@ -935,18 +820,8 @@
         if (!date) { showToast("Select date", true); return; }
         if (isNaN(birds) || birds <= 0) { showToast("Enter valid bird count (greater than 0)", true); return; }
         if (isNaN(eggs) || eggs < 0) { showToast("Enter valid egg count", true); return; }
-        
         const newRef = push(getUserDailyRef());
-        await set(newRef, { 
-            date, 
-            activeBirds: birds, 
-            eggsCollected: eggs, 
-            damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, 
-            feedKg: parseFloat(document.getElementById("feedKg").value) || 0, 
-            mortality: parseInt(document.getElementById("mortalityCount").value) || 0, 
-            timestamp: new Date().toISOString() 
-        });
-        
+        await set(newRef, { date, activeBirds: birds, eggsCollected: eggs, damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, feedKg: parseFloat(document.getElementById("feedKg").value) || 0, mortality: parseInt(document.getElementById("mortalityCount").value) || 0, timestamp: new Date().toISOString() });
         const layingRate = ((eggs / birds) * 100).toFixed(1);
         showSuccessModalWithRedirect(`Daily record saved! ${eggs} eggs from ${birds} birds. Laying rate: ${layingRate}%`, true);
         resetDailyForm();
@@ -958,19 +833,8 @@
         if (isNaN(qty) || qty <= 0) { showToast("Enter valid quantity", true); return; }
         if (isNaN(price) || price <= 0) { showToast("Enter valid price", true); return; }
         const total = qty * price;
-        
         const newRef = push(getUserSalesRef());
-        await set(newRef, { 
-            date: document.getElementById("saleDate").value, 
-            itemType: document.getElementById("saleItemType").value, 
-            quantity: qty, 
-            unitPrice: price, 
-            total: total, 
-            customer: document.getElementById("customerProfile").value || "Walk-in", 
-            paymentStatus: document.getElementById("paymentStatus").value, 
-            timestamp: new Date().toISOString() 
-        });
-        
+        await set(newRef, { date: document.getElementById("saleDate").value, itemType: document.getElementById("saleItemType").value, quantity: qty, unitPrice: price, total: total, customer: document.getElementById("customerProfile").value || "Walk-in", paymentStatus: document.getElementById("paymentStatus").value, timestamp: new Date().toISOString() });
         showSuccessModalWithRedirect(`Sale recorded! ${qty} ${document.getElementById("saleItemType").value} sold for KES ${total.toLocaleString()}.`, true);
         resetSalesForm();
     });
@@ -978,17 +842,8 @@
     document.getElementById("addExpenseBtn")?.addEventListener("click", async () => {
         const cost = parseFloat(document.getElementById("expenseTotalCost").value);
         if (isNaN(cost) || cost <= 0) { showToast("Enter valid expense amount", true); return; }
-        
         const newRef = push(getUserExpensesRef());
-        await set(newRef, { 
-            date: document.getElementById("expenseDate").value, 
-            category: document.getElementById("expenseCategory").value, 
-            description: document.getElementById("expenseDesc").value || "No description", 
-            quantity: parseFloat(document.getElementById("expenseQty").value) || 1, 
-            totalCost: cost, 
-            timestamp: new Date().toISOString() 
-        });
-        
+        await set(newRef, { date: document.getElementById("expenseDate").value, category: document.getElementById("expenseCategory").value, description: document.getElementById("expenseDesc").value || "No description", quantity: parseFloat(document.getElementById("expenseQty").value) || 1, totalCost: cost, timestamp: new Date().toISOString() });
         showSuccessModalWithRedirect(`Expense recorded! KES ${cost.toLocaleString()} spent on ${document.getElementById("expenseCategory").value}.`, true);
         resetExpensesForm();
     });
@@ -998,58 +853,31 @@
         const birdType = document.getElementById("birdType").value;
         const totalBirds = parseInt(document.getElementById("totalBirds").value) || 0;
         const housingType = document.getElementById("housingType").value;
-        
         if (!flockName) { showToast("Please enter flock name", true); return; }
         if (totalBirds <= 0) { showToast("Please enter valid total birds count", true); return; }
-        
-        await set(getUserFlockRef(), { 
-            flockName: flockName, 
-            birdType: birdType, 
-            totalBirds: totalBirds, 
-            housingType: housingType, 
-            updatedAt: new Date().toISOString() 
-        });
-        
+        await set(getUserFlockRef(), { flockName, birdType, totalBirds, housingType, updatedAt: new Date().toISOString() });
         showSuccessModalWithRedirect(`Flock settings saved! ${flockName} configured with ${totalBirds} ${birdType}.`, true);
         resetFlockForm();
     });
     
     document.getElementById("exportReportBtn")?.addEventListener("click", () => {
-        const data = { 
-            daily: currentDaily, 
-            sales: currentSales, 
-            expenses: currentExpenses, 
-            exportedAt: new Date().toISOString(),
-            flockSettings: document.getElementById("flockName").value
-        };
+        const data = { daily: currentDaily, sales: currentSales, expenses: currentExpenses, exportedAt: new Date().toISOString(), flockSettings: document.getElementById("flockName").value };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-        const a = document.createElement("a"); 
-        a.href = URL.createObjectURL(blob); 
-        a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; 
-        a.click();
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; a.click();
         URL.revokeObjectURL(a.href);
-        showSuccessModalWithRedirect("Report exported successfully! Your data has been saved as a JSON file.", true);
+        showSuccessModalWithRedirect("Report exported successfully!", true);
     });
     
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => { 
-        await signOut(auth); 
-        showToast("Logged out successfully"); 
-    });
-    
-    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { 
-        loadAdminPanel(); 
-        showToast("Admin data refreshed"); 
-    });
+    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); showToast("Logged out successfully"); });
+    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { loadAdminPanel(); showToast("Admin data refreshed"); });
 
-    // Tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("tab-active"));
             btn.classList.add("tab-active");
             const target = btn.getAttribute("data-tab");
             document.querySelectorAll(".tab-content").forEach(sec => sec.classList.add("hidden"));
-            const targetSection = document.getElementById(`${target}-section`);
-            if (targetSection) targetSection.classList.remove("hidden");
+            document.getElementById(`${target}-section`).classList.remove("hidden");
             if (target === "flock" && currentUser) loadFlockSettings();
             if (target === "admin" && currentUserRole === "admin") loadAdminPanel();
         });
@@ -1057,24 +885,16 @@
     
     document.getElementById("dashboardMonth")?.addEventListener("change", () => refreshDashboard());
 
-    // Auth handlers
     document.getElementById("loginBtn")?.addEventListener("click", async () => {
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
         const rememberMe = document.getElementById("rememberMe").checked;
         if (!email || !password) { showErrorMsg("Enter email and password"); return; }
         try {
-            if (rememberMe) { await setPersistence(auth, browserLocalPersistence); } 
-            else { await setPersistence(auth, browserSessionPersistence); }
+            if (rememberMe) { await setPersistence(auth, browserLocalPersistence); } else { await setPersistence(auth, browserSessionPersistence); }
             await signInWithEmailAndPassword(auth, email, password);
             showToast("Login successful!");
-        } catch(e) { 
-            let msg = e.message;
-            if (e.code === 'auth/invalid-credential') msg = "Invalid email or password";
-            else if (e.code === 'auth/user-not-found') msg = "User not found. Please register first.";
-            else if (e.code === 'auth/wrong-password') msg = "Wrong password";
-            showErrorMsg(msg);
-        }
+        } catch(e) { let msg = e.code === 'auth/invalid-credential' ? "Invalid email or password" : e.message; showErrorMsg(msg); }
     });
     
     document.getElementById("registerBtn")?.addEventListener("click", async () => {
@@ -1089,67 +909,36 @@
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(cred.user, { displayName: name });
-            await set(ref(db, `users/${cred.user.uid}`), { 
-                email: email, 
-                displayName: name,
-                fullName: name,
-                farmName: farmName, 
-                createdAt: new Date().toISOString() 
-            });
+            await set(ref(db, `users/${cred.user.uid}`), { email, displayName: name, fullName: name, farmName, createdAt: new Date().toISOString() });
             showSuccessModalWithRedirect(`Welcome ${name}! Your account has been created successfully for ${farmName}.`, true);
-        } catch(e) { 
-            let msg = e.message;
-            if (e.code === 'auth/email-already-in-use') msg = "Email already registered. Please login.";
-            showErrorMsg(msg);
-        }
+        } catch(e) { let msg = e.code === 'auth/email-already-in-use' ? "Email already registered. Please login." : e.message; showErrorMsg(msg); }
     });
     
-    document.getElementById("showRegisterBtn")?.addEventListener("click", () => {
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("registerForm").classList.remove("hidden");
-        document.getElementById("errorMsg")?.classList.add("hidden");
-    });
-    
-    document.getElementById("showLoginBtn")?.addEventListener("click", () => {
-        document.getElementById("registerForm").classList.add("hidden");
-        document.getElementById("loginForm").classList.remove("hidden");
-        document.getElementById("errorMsg")?.classList.add("hidden");
-    });
+    document.getElementById("showRegisterBtn")?.addEventListener("click", () => { document.getElementById("loginForm").classList.add("hidden"); document.getElementById("registerForm").classList.remove("hidden"); document.getElementById("errorMsg")?.classList.add("hidden"); });
+    document.getElementById("showLoginBtn")?.addEventListener("click", () => { document.getElementById("registerForm").classList.add("hidden"); document.getElementById("loginForm").classList.remove("hidden"); document.getElementById("errorMsg")?.classList.add("hidden"); });
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             currentUserRole = ADMIN_EMAILS.includes(user.email) ? "admin" : "user";
-            const userEmailSpan = document.getElementById("userEmailDisplay");
-            if (userEmailSpan) userEmailSpan.innerHTML = `${user.email}`;
+            document.getElementById("userEmailDisplay").innerHTML = `${user.email}`;
             const roleBadge = document.getElementById("roleBadge");
-            if (roleBadge) {
-                if (currentUserRole === "admin") {
-                    roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
-                    roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold admin-badge";
-                    const adminTabBtn = document.getElementById("adminTabBtn");
-                    if (adminTabBtn) adminTabBtn.classList.remove("hidden");
-                } else {
-                    roleBadge.innerHTML = '<i class="fas fa-user mr-1"></i> User';
-                    roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
-                    const adminTabBtn = document.getElementById("adminTabBtn");
-                    if (adminTabBtn) adminTabBtn.classList.add("hidden");
-                }
+            if (currentUserRole === "admin") {
+                roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
+                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold admin-badge";
+                document.getElementById("adminTabBtn").classList.remove("hidden");
+            } else {
+                roleBadge.innerHTML = '<i class="fas fa-user mr-1"></i> User';
+                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
+                document.getElementById("adminTabBtn").classList.add("hidden");
             }
-            const authModal = document.getElementById("authModal");
-            const mainApp = document.getElementById("mainApp");
-            if (authModal) authModal.classList.add("hidden");
-            if (mainApp) mainApp.classList.remove("hidden");
+            document.getElementById("authModal").classList.add("hidden");
+            document.getElementById("mainApp").classList.remove("hidden");
             startRealtimeListeners();
             await loadFlockSettings();
         } else {
-            const authModal = document.getElementById("authModal");
-            const mainApp = document.getElementById("mainApp");
-            if (authModal) authModal.classList.remove("hidden");
-            if (mainApp) mainApp.classList.add("hidden");
-            // Clear form fields
-            document.getElementById("loginEmail").value = "";
-            document.getElementById("loginPassword").value = "";
+            document.getElementById("authModal").classList.remove("hidden");
+            document.getElementById("mainApp").classList.add("hidden");
         }
     });
 </script>
