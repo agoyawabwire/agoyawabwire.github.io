@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { transition: all 0.2s ease; }
-        body { background: linear-gradient(135deg, #f0f4f0 0%, #e8ece8 100%); min-height: 100vh; }
+        body { background: linear-gradient(135deg, #f0f4f0 0%, #e8ece8 100%); min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
         input, select, textarea {
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
@@ -41,6 +41,7 @@
             border: none;
         }
         .btn-primary:hover { background: linear-gradient(135deg, #166534 0%, #14532d 100%); transform: scale(1.02); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .tab-active {
             border-bottom: 3px solid #15803d;
             color: #15803d;
@@ -57,6 +58,7 @@
             z-index: 1000;
             font-size: 0.875rem;
             animation: slideIn 0.3s ease;
+            max-width: 90%;
         }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
@@ -149,6 +151,24 @@
         tr:hover {
             background-color: #f9fafb;
         }
+        .delete-btn {
+            cursor: pointer;
+            color: #ef4444;
+            transition: color 0.2s;
+        }
+        .delete-btn:hover { color: #dc2626; transform: scale(1.1); display: inline-block; }
+        
+        /* Loading state */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -164,29 +184,31 @@
             <p class="text-gray-500 text-sm mt-1">Smart poultry farm management</p>
         </div>
         
+        <div id="errorMsg" class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 hidden text-sm"></div>
+        
         <div id="loginForm">
             <div class="mb-4">
-                <input type="email" id="loginEmail" class="w-full border rounded-lg p-3" placeholder="Email Address">
+                <input type="email" id="loginEmail" class="w-full border rounded-lg p-3" placeholder="Email Address" required>
             </div>
             <div class="mb-4">
-                <input type="password" id="loginPassword" class="w-full border rounded-lg p-3" placeholder="Password">
+                <input type="password" id="loginPassword" class="w-full border rounded-lg p-3" placeholder="Password" required>
             </div>
             <div class="mb-4 flex items-center gap-2">
                 <input type="checkbox" id="rememberMe" class="w-4 h-4">
                 <label class="text-sm text-gray-600">Remember me</label>
             </div>
             <button id="loginBtn" class="btn-primary w-full py-3">Sign In</button>
-            <p class="text-center text-sm text-gray-600 mt-4">New user? <button id="showRegisterBtn" class="text-green-700 font-semibold">Create Account</button></p>
+            <p class="text-center text-sm text-gray-600 mt-4">New user? <button id="showRegisterBtn" class="text-green-700 font-semibold hover:underline">Create Account</button></p>
         </div>
         
         <div id="registerForm" class="hidden">
-            <div class="mb-3"><input type="text" id="regName" class="w-full border rounded-lg p-3" placeholder="Full Name"></div>
-            <div class="mb-3"><input type="email" id="regEmail" class="w-full border rounded-lg p-3" placeholder="Email"></div>
-            <div class="mb-3"><input type="password" id="regPassword" class="w-full border rounded-lg p-3" placeholder="Password (min 6)"></div>
-            <div class="mb-3"><input type="password" id="regConfirmPassword" class="w-full border rounded-lg p-3" placeholder="Confirm Password"></div>
-            <div class="mb-4"><input type="text" id="regFarmName" class="w-full border rounded-lg p-3" placeholder="Farm Name"></div>
+            <div class="mb-3"><input type="text" id="regName" class="w-full border rounded-lg p-3" placeholder="Full Name" required></div>
+            <div class="mb-3"><input type="email" id="regEmail" class="w-full border rounded-lg p-3" placeholder="Email" required></div>
+            <div class="mb-3"><input type="password" id="regPassword" class="w-full border rounded-lg p-3" placeholder="Password (min 6)" required></div>
+            <div class="mb-3"><input type="password" id="regConfirmPassword" class="w-full border rounded-lg p-3" placeholder="Confirm Password" required></div>
+            <div class="mb-4"><input type="text" id="regFarmName" class="w-full border rounded-lg p-3" placeholder="Farm Name" required></div>
             <button id="registerBtn" class="btn-primary w-full py-3">Create Account</button>
-            <p class="text-center text-sm text-gray-600 mt-4">Have account? <button id="showLoginBtn" class="text-green-700 font-semibold">Sign In</button></p>
+            <p class="text-center text-sm text-gray-600 mt-4">Have account? <button id="showLoginBtn" class="text-green-700 font-semibold hover:underline">Sign In</button></p>
         </div>
     </div>
 </div>
@@ -222,10 +244,10 @@
                     <span id="userEmailDisplay" class="text-sm font-medium">Loading...</span>
                 </div>
                 <div id="roleBadge" class="px-3 py-1 rounded-full text-xs font-semibold admin-badge">Admin</div>
-                <button id="exportReportBtn" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
+                <button id="exportReportBtn" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-100 transition">
                     <i class="fas fa-download mr-1"></i> Export
                 </button>
-                <button id="logoutBtn" class="bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-100">
+                <button id="logoutBtn" class="bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-100 transition">
                     <i class="fas fa-sign-out-alt mr-1"></i> Logout
                 </button>
             </div>
@@ -303,7 +325,7 @@
         </div>
         
         <div class="bg-white rounded-xl shadow-sm p-5">
-            <canvas id="eggTrendChart" height="80"></canvas>
+            <canvas id="eggTrendChart" height="80" style="max-height: 300px;"></canvas>
         </div>
     </div>
 
@@ -313,11 +335,11 @@
             <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Add Daily Record</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="dailyDate" class="w-full border rounded-lg p-2"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Active Birds</label><input type="number" id="activeBirds" class="w-full border rounded-lg p-2" placeholder="Number of birds"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Eggs Collected</label><input type="number" id="eggsCollected" class="w-full border rounded-lg p-2" placeholder="Total eggs"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Damaged Eggs</label><input type="number" id="damagedEggs" class="w-full border rounded-lg p-2" placeholder="Damaged" value="0"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Feed Consumed (kg)</label><input type="number" step="0.1" id="feedKg" class="w-full border rounded-lg p-2" placeholder="Feed in kg"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Mortality</label><input type="number" id="mortalityCount" class="w-full border rounded-lg p-2" placeholder="Bird deaths" value="0"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Active Birds</label><input type="number" id="activeBirds" class="w-full border rounded-lg p-2" placeholder="Number of birds" min="1"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Eggs Collected</label><input type="number" id="eggsCollected" class="w-full border rounded-lg p-2" placeholder="Total eggs" min="0"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Damaged Eggs</label><input type="number" id="damagedEggs" class="w-full border rounded-lg p-2" placeholder="Damaged" value="0" min="0"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Feed Consumed (kg)</label><input type="number" step="0.1" id="feedKg" class="w-full border rounded-lg p-2" placeholder="Feed in kg" min="0"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Mortality</label><input type="number" id="mortalityCount" class="w-full border rounded-lg p-2" placeholder="Bird deaths" value="0" min="0"></div>
             </div>
             <button id="addDailyEntry" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-save mr-2"></i> Save Record</button>
         </div>
@@ -334,7 +356,7 @@
                         <th class="p-3 text-left">Feed(kg)</th>
                         <th class="p-3 text-left">Mortality</th>
                         <th class="p-3 text-left">Action</th>
-                    </tr>
+                    <tr>
                 </thead>
                 <tbody id="dailyTableBody">
                     <tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>
@@ -350,8 +372,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="saleDate" class="w-full border rounded-lg p-2"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Item Type</label><select id="saleItemType" class="w-full border rounded-lg p-2"><option>Eggs (Crates)</option><option>Eggs (Single)</option><option>Culled Birds</option><option>Broilers</option></select></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="saleQuantity" class="w-full border rounded-lg p-2" placeholder="Quantity"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (KES)</label><input type="number" id="saleUnitPrice" class="w-full border rounded-lg p-2" placeholder="Price per unit"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="saleQuantity" class="w-full border rounded-lg p-2" placeholder="Quantity" min="1"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (KES)</label><input type="number" id="saleUnitPrice" class="w-full border rounded-lg p-2" placeholder="Price per unit" min="1"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer</label><input type="text" id="customerProfile" class="w-full border rounded-lg p-2" placeholder="Customer name"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label><select id="paymentStatus" class="w-full border rounded-lg p-2"><option>Paid</option><option>Credit/Pending</option></select></div>
             </div>
@@ -386,8 +408,8 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="expenseDate" class="w-full border rounded-lg p-2"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Category</label><select id="expenseCategory" class="w-full border rounded-lg p-2"><option>Feed</option><option>Vet/Medication</option><option>Labour</option><option>Utilities</option><option>Transport</option><option>Chicks Bought</option><option>Equipment</option><option>Other</option></select></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="expenseDesc" class="w-full border rounded-lg p-2" placeholder="Description"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="expenseQty" class="w-full border rounded-lg p-2" placeholder="Quantity" value="1"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Cost (KES)</label><input type="number" id="expenseTotalCost" class="w-full border rounded-lg p-2" placeholder="Total cost"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="expenseQty" class="w-full border rounded-lg p-2" placeholder="Quantity" value="1" min="1"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Cost (KES)</label><input type="number" id="expenseTotalCost" class="w-full border rounded-lg p-2" placeholder="Total cost" min="1"></div>
             </div>
             <button id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
         </div>
@@ -433,7 +455,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Total Birds</label>
-                    <input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock">
+                    <input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock" min="1">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Housing Type</label>
@@ -529,36 +551,50 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
+    function showErrorMsg(msg) {
+        const errorDiv = document.getElementById("errorMsg");
+        if (errorDiv) {
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${msg}`;
+            errorDiv.classList.remove("hidden");
+            setTimeout(() => errorDiv.classList.add("hidden"), 5000);
+        } else {
+            showToast(msg, true);
+        }
+    }
+
     function showSuccessModalWithRedirect(message, redirectToDashboard = true) {
         const modal = document.getElementById("successModal");
+        if (!modal) return;
         document.getElementById("successMessage").textContent = message;
         document.getElementById("successTitle").textContent = "Success!";
         
         if (redirectToDashboard) {
             const countdownDiv = document.getElementById("redirectCountdown");
             const countdownSpan = document.getElementById("countdownSec");
-            countdownDiv.classList.remove("hidden");
-            
-            let seconds = 3;
-            countdownSpan.textContent = seconds;
-            
-            if (redirectTimer) clearInterval(redirectTimer);
-            redirectTimer = setInterval(() => {
-                seconds--;
+            if (countdownDiv && countdownSpan) {
+                countdownDiv.classList.remove("hidden");
+                let seconds = 3;
                 countdownSpan.textContent = seconds;
-                if (seconds <= 0) {
-                    clearInterval(redirectTimer);
-                    modal.classList.add("hidden");
-                    countdownDiv.classList.add("hidden");
-                    document.querySelectorAll(".tab-btn").forEach(btn => {
-                        if (btn.getAttribute("data-tab") === "dashboard") {
-                            btn.click();
-                        }
-                    });
-                }
-            }, 1000);
+                
+                if (redirectTimer) clearInterval(redirectTimer);
+                redirectTimer = setInterval(() => {
+                    seconds--;
+                    countdownSpan.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(redirectTimer);
+                        modal.classList.add("hidden");
+                        countdownDiv.classList.add("hidden");
+                        document.querySelectorAll(".tab-btn").forEach(btn => {
+                            if (btn.getAttribute("data-tab") === "dashboard") {
+                                btn.click();
+                            }
+                        });
+                    }
+                }, 1000);
+            }
         } else {
-            document.getElementById("redirectCountdown").classList.add("hidden");
+            const countdownDiv = document.getElementById("redirectCountdown");
+            if (countdownDiv) countdownDiv.classList.add("hidden");
         }
         
         modal.classList.remove("hidden");
@@ -566,7 +602,9 @@
         document.getElementById("closeSuccessModal").onclick = () => {
             if (redirectTimer) clearInterval(redirectTimer);
             modal.classList.add("hidden");
-            document.getElementById("redirectCountdown").classList.add("hidden");
+            if (document.getElementById("redirectCountdown")) {
+                document.getElementById("redirectCountdown").classList.add("hidden");
+            }
             if (redirectToDashboard) {
                 document.querySelectorAll(".tab-btn").forEach(btn => {
                     if (btn.getAttribute("data-tab") === "dashboard") {
@@ -582,7 +620,8 @@
     }
 
     function resetDailyForm() {
-        document.getElementById("dailyDate").value = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("dailyDate").value = today;
         document.getElementById("activeBirds").value = "";
         document.getElementById("eggsCollected").value = "";
         document.getElementById("damagedEggs").value = "0";
@@ -591,7 +630,8 @@
     }
 
     function resetSalesForm() {
-        document.getElementById("saleDate").value = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("saleDate").value = today;
         document.getElementById("saleItemType").value = "Eggs (Crates)";
         document.getElementById("saleQuantity").value = "";
         document.getElementById("saleUnitPrice").value = "";
@@ -600,7 +640,8 @@
     }
 
     function resetExpensesForm() {
-        document.getElementById("expenseDate").value = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("expenseDate").value = today;
         document.getElementById("expenseCategory").value = "Feed";
         document.getElementById("expenseDesc").value = "";
         document.getElementById("expenseQty").value = "1";
@@ -623,24 +664,28 @@
         const tbody = document.getElementById("dailyTableBody");
         if (!tbody) return;
         if (currentDaily.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td><tr>';
             return; 
         }
         const sorted = [...currentDaily].sort((a,b) => new Date(b.date) - new Date(a.date));
         tbody.innerHTML = sorted.map(entry => {
             const goodEggs = (entry.eggsCollected || 0) - (entry.damagedEggs || 0);
             const layingRate = entry.activeBirds && entry.activeBirds > 0 ? ((entry.eggsCollected / entry.activeBirds) * 100).toFixed(1) : 0;
+            let rateColor = '';
+            if (layingRate >= 70) rateColor = 'text-green-600';
+            else if (layingRate >= 50) rateColor = 'text-yellow-600';
+            else rateColor = 'text-red-600';
             return `<tr class="border-b hover:bg-gray-50">
                         <td class="p-3">${entry.date}</td>
                         <td class="p-3">${entry.activeBirds}</td>
                         <td class="p-3">${entry.eggsCollected}</td>
                         <td class="p-3 text-red-600">${entry.damagedEggs||0}</td>
                         <td class="p-3 text-green-600 font-semibold">${goodEggs}</td>
-                        <td class="p-3 ${layingRate >= 70 ? 'text-green-600' : layingRate >= 50 ? 'text-yellow-600' : 'text-red-600'} font-semibold">${layingRate}%</td>
+                        <td class="p-3 ${rateColor} font-semibold">${layingRate}%</td>
                         <td class="p-3">${entry.feedKg||0}</td>
                         <td class="p-3 text-red-600">${entry.mortality||0}</td>
-                        <td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td>
-                    </tr>`;
+                        <td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700 transition" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td>
+                     </tr>`;
         }).join('');
         
         document.querySelectorAll(".delete-daily").forEach(btn => {
@@ -655,8 +700,9 @@
 
     function renderSalesTable() {
         const tbody = document.getElementById("salesTableBody");
+        if (!tbody) return;
         if (currentSales.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td><tr>';
             return; 
         }
         const sorted = [...currentSales].sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -668,8 +714,8 @@
                     <td class="p-3 text-green-600 font-semibold">KES ${s.total}</td>
                     <td class="p-3">${s.customer || '-'}</td>
                     <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td>
-                    <td class="p-3"><button class="delete-sale text-red-500 hover:text-red-700" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>`).join('');
+                    <td class="p-3"><button class="delete-sale text-red-500 hover:text-red-700 transition" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
+                 </tr>`).join('');
         
         document.querySelectorAll(".delete-sale").forEach(btn => {
             btn.addEventListener("click", async () => {
@@ -683,8 +729,9 @@
 
     function renderExpensesTable() {
         const tbody = document.getElementById("expensesTableBody");
+        if (!tbody) return;
         if (currentExpenses.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td><tr>';
             return; 
         }
         const sorted = [...currentExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -694,8 +741,8 @@
                     <td class="p-3">${e.description || '-'}</td>
                     <td class="p-3">${e.quantity}</td>
                     <td class="p-3 text-red-600 font-semibold">KES ${e.totalCost}</td>
-                    <td class="p-3"><button class="delete-exp text-red-500 hover:text-red-700" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>`).join('');
+                    <td class="p-3"><button class="delete-exp text-red-500 hover:text-red-700 transition" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td>
+                 </tr>`).join('');
         
         document.querySelectorAll(".delete-exp").forEach(btn => {
             btn.addEventListener("click", async () => {
@@ -725,7 +772,7 @@
         const expense = filteredExpenses.reduce((s,e) => s + (e.totalCost || 0), 0);
         const profit = revenue - expense;
         
-        document.getElementById("kpiTotalEggs").innerText = totalEggs;
+        document.getElementById("kpiTotalEggs").innerText = totalEggs.toLocaleString();
         document.getElementById("kpiFeedUsed").innerText = totalFeed.toFixed(1);
         document.getElementById("kpiLayingRate").innerHTML = `${avgRate}%`;
         document.getElementById("kpiMortality").innerText = totalMortality;
@@ -739,26 +786,49 @@
         const ctx = document.getElementById('eggTrendChart')?.getContext('2d');
         if (ctx) {
             if (currentChart) currentChart.destroy();
-            currentChart = new Chart(ctx, { type: 'line', data: { labels: last14.map(d=>d.date.slice(5)), datasets: [{ label: 'Eggs Collected', data: last14.map(d=>d.eggsCollected), borderColor: '#15803d', tension: 0.3, fill: false }] } });
+            currentChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: last14.map(d=>d.date ? d.date.slice(5) : ''), 
+                    datasets: [{ 
+                        label: 'Eggs Collected', 
+                        data: last14.map(d=>d.eggsCollected), 
+                        borderColor: '#15803d', 
+                        backgroundColor: 'rgba(21,128,61,0.1)',
+                        tension: 0.3, 
+                        fill: true 
+                    }] 
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
         }
     }
 
     function startRealtimeListeners() {
-        onValue(getUserDailyRef(), (snapshot) => {
+        const dailyRef = getUserDailyRef();
+        onValue(dailyRef, (snapshot) => {
             const data = snapshot.val();
             currentDaily = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
             renderDailyTable();
             refreshDashboard();
         });
         
-        onValue(getUserSalesRef(), (snapshot) => {
+        const salesRef = getUserSalesRef();
+        onValue(salesRef, (snapshot) => {
             const data = snapshot.val();
             currentSales = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
             renderSalesTable();
             refreshDashboard();
         });
         
-        onValue(getUserExpensesRef(), (snapshot) => {
+        const expensesRef = getUserExpensesRef();
+        onValue(expensesRef, (snapshot) => {
             const data = snapshot.val();
             currentExpenses = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
             renderExpensesTable();
@@ -768,7 +838,8 @@
 
     async function loadFlockSettings() {
         try {
-            const snapshot = await get(getUserFlockRef());
+            const flockRef = getUserFlockRef();
+            const snapshot = await get(flockRef);
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 document.getElementById("flockName").value = data.flockName || "";
@@ -776,7 +847,9 @@
                 document.getElementById("totalBirds").value = data.totalBirds || "";
                 document.getElementById("housingType").value = data.housingType || "Free Range";
             }
-        } catch (error) { console.error("Error loading flock:", error); }
+        } catch (error) { 
+            console.error("Error loading flock:", error);
+        }
     }
 
     async function loadAdminPanel() {
@@ -789,7 +862,8 @@
             
             if (usersData) {
                 for (const [uid, userData] of Object.entries(usersData)) {
-                    let userEmail = userData.email || "No email saved";
+                    if (uid === 'config') continue;
+                    let userEmail = userData.email || uid;
                     let userFullName = userData.displayName || userData.fullName || "Not set";
                     let userFarmName = userData.farmName || "Not set";
                     let userRole = ADMIN_EMAILS.includes(userEmail) ? "admin" : "user";
@@ -819,23 +893,33 @@
             
             const tbody = document.getElementById("adminUsersTableBody");
             if (usersList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No users registered yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No users registered yet</td><tr>';
             } else {
                 tbody.innerHTML = usersList.map(u => `
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${u.email}</td>
-                        <td class="p-3">${u.fullName}</td>
-                        <td class="p-3">${u.farmName}</td>
+                        <td class="p-3">${escapeHtml(u.email)}</td>
+                        <td class="p-3">${escapeHtml(u.fullName)}</td>
+                        <td class="p-3">${escapeHtml(u.farmName)}</td>
                         <td class="p-3"><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span></td>
                         <td class="p-3">${u.joined}</td>
                         <td class="p-3">${u.records} records</td>
-                    </tr>
+                     </tr>
                 `).join('');
             }
         } catch (error) { 
             console.error("Admin panel error:", error);
-            document.getElementById("adminUsersTableBody").innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error loading users</td></tr>';
+            document.getElementById("adminUsersTableBody").innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error loading users</td><tr>';
         }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -843,17 +927,25 @@
     document.getElementById("saleDate").value = today;
     document.getElementById("expenseDate").value = today;
 
-    // Event Handlers
+    // Event Handlers with validation
     document.getElementById("addDailyEntry")?.addEventListener("click", async () => {
         const date = document.getElementById("dailyDate").value;
         const birds = parseInt(document.getElementById("activeBirds").value);
         const eggs = parseInt(document.getElementById("eggsCollected").value);
         if (!date) { showToast("Select date", true); return; }
-        if (isNaN(birds) || birds <= 0) { showToast("Enter valid bird count", true); return; }
+        if (isNaN(birds) || birds <= 0) { showToast("Enter valid bird count (greater than 0)", true); return; }
         if (isNaN(eggs) || eggs < 0) { showToast("Enter valid egg count", true); return; }
         
         const newRef = push(getUserDailyRef());
-        await set(newRef, { date, activeBirds: birds, eggsCollected: eggs, damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, feedKg: parseFloat(document.getElementById("feedKg").value) || 0, mortality: parseInt(document.getElementById("mortalityCount").value) || 0, timestamp: new Date().toISOString() });
+        await set(newRef, { 
+            date, 
+            activeBirds: birds, 
+            eggsCollected: eggs, 
+            damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, 
+            feedKg: parseFloat(document.getElementById("feedKg").value) || 0, 
+            mortality: parseInt(document.getElementById("mortalityCount").value) || 0, 
+            timestamp: new Date().toISOString() 
+        });
         
         const layingRate = ((eggs / birds) * 100).toFixed(1);
         showSuccessModalWithRedirect(`Daily record saved! ${eggs} eggs from ${birds} birds. Laying rate: ${layingRate}%`, true);
@@ -868,7 +960,16 @@
         const total = qty * price;
         
         const newRef = push(getUserSalesRef());
-        await set(newRef, { date: document.getElementById("saleDate").value, itemType: document.getElementById("saleItemType").value, quantity: qty, unitPrice: price, total: total, customer: document.getElementById("customerProfile").value || "Walk-in", paymentStatus: document.getElementById("paymentStatus").value, timestamp: new Date().toISOString() });
+        await set(newRef, { 
+            date: document.getElementById("saleDate").value, 
+            itemType: document.getElementById("saleItemType").value, 
+            quantity: qty, 
+            unitPrice: price, 
+            total: total, 
+            customer: document.getElementById("customerProfile").value || "Walk-in", 
+            paymentStatus: document.getElementById("paymentStatus").value, 
+            timestamp: new Date().toISOString() 
+        });
         
         showSuccessModalWithRedirect(`Sale recorded! ${qty} ${document.getElementById("saleItemType").value} sold for KES ${total.toLocaleString()}.`, true);
         resetSalesForm();
@@ -879,14 +980,21 @@
         if (isNaN(cost) || cost <= 0) { showToast("Enter valid expense amount", true); return; }
         
         const newRef = push(getUserExpensesRef());
-        await set(newRef, { date: document.getElementById("expenseDate").value, category: document.getElementById("expenseCategory").value, description: document.getElementById("expenseDesc").value || "No description", quantity: parseFloat(document.getElementById("expenseQty").value) || 1, totalCost: cost, timestamp: new Date().toISOString() });
+        await set(newRef, { 
+            date: document.getElementById("expenseDate").value, 
+            category: document.getElementById("expenseCategory").value, 
+            description: document.getElementById("expenseDesc").value || "No description", 
+            quantity: parseFloat(document.getElementById("expenseQty").value) || 1, 
+            totalCost: cost, 
+            timestamp: new Date().toISOString() 
+        });
         
         showSuccessModalWithRedirect(`Expense recorded! KES ${cost.toLocaleString()} spent on ${document.getElementById("expenseCategory").value}.`, true);
         resetExpensesForm();
     });
     
     document.getElementById("updateFlockBtn")?.addEventListener("click", async () => {
-        const flockName = document.getElementById("flockName").value;
+        const flockName = document.getElementById("flockName").value.trim();
         const birdType = document.getElementById("birdType").value;
         const totalBirds = parseInt(document.getElementById("totalBirds").value) || 0;
         const housingType = document.getElementById("housingType").value;
@@ -894,22 +1002,44 @@
         if (!flockName) { showToast("Please enter flock name", true); return; }
         if (totalBirds <= 0) { showToast("Please enter valid total birds count", true); return; }
         
-        await set(getUserFlockRef(), { flockName: flockName, birdType: birdType, totalBirds: totalBirds, housingType: housingType, updatedAt: new Date().toISOString() });
+        await set(getUserFlockRef(), { 
+            flockName: flockName, 
+            birdType: birdType, 
+            totalBirds: totalBirds, 
+            housingType: housingType, 
+            updatedAt: new Date().toISOString() 
+        });
         
         showSuccessModalWithRedirect(`Flock settings saved! ${flockName} configured with ${totalBirds} ${birdType}.`, true);
         resetFlockForm();
     });
     
     document.getElementById("exportReportBtn")?.addEventListener("click", () => {
-        const data = { daily: currentDaily, sales: currentSales, expenses: currentExpenses, exportedAt: new Date().toISOString() };
+        const data = { 
+            daily: currentDaily, 
+            sales: currentSales, 
+            expenses: currentExpenses, 
+            exportedAt: new Date().toISOString(),
+            flockSettings: document.getElementById("flockName").value
+        };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; a.click();
+        const a = document.createElement("a"); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; 
+        a.click();
+        URL.revokeObjectURL(a.href);
         showSuccessModalWithRedirect("Report exported successfully! Your data has been saved as a JSON file.", true);
     });
     
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); showToast("Logged out successfully"); });
+    document.getElementById("logoutBtn")?.addEventListener("click", async () => { 
+        await signOut(auth); 
+        showToast("Logged out successfully"); 
+    });
     
-    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { loadAdminPanel(); showToast("Admin data refreshed"); });
+    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { 
+        loadAdminPanel(); 
+        showToast("Admin data refreshed"); 
+    });
 
     // Tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -918,7 +1048,8 @@
             btn.classList.add("tab-active");
             const target = btn.getAttribute("data-tab");
             document.querySelectorAll(".tab-content").forEach(sec => sec.classList.add("hidden"));
-            document.getElementById(`${target}-section`).classList.remove("hidden");
+            const targetSection = document.getElementById(`${target}-section`);
+            if (targetSection) targetSection.classList.remove("hidden");
             if (target === "flock" && currentUser) loadFlockSettings();
             if (target === "admin" && currentUserRole === "admin") loadAdminPanel();
         });
@@ -928,27 +1059,33 @@
 
     // Auth handlers
     document.getElementById("loginBtn")?.addEventListener("click", async () => {
-        const email = document.getElementById("loginEmail").value;
+        const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
         const rememberMe = document.getElementById("rememberMe").checked;
-        if (!email || !password) { showToast("Enter email and password", true); return; }
+        if (!email || !password) { showErrorMsg("Enter email and password"); return; }
         try {
             if (rememberMe) { await setPersistence(auth, browserLocalPersistence); } 
             else { await setPersistence(auth, browserSessionPersistence); }
             await signInWithEmailAndPassword(auth, email, password);
             showToast("Login successful!");
-        } catch(e) { showToast(e.message, true); }
+        } catch(e) { 
+            let msg = e.message;
+            if (e.code === 'auth/invalid-credential') msg = "Invalid email or password";
+            else if (e.code === 'auth/user-not-found') msg = "User not found. Please register first.";
+            else if (e.code === 'auth/wrong-password') msg = "Wrong password";
+            showErrorMsg(msg);
+        }
     });
     
     document.getElementById("registerBtn")?.addEventListener("click", async () => {
-        const name = document.getElementById("regName").value;
-        const email = document.getElementById("regEmail").value;
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
         const password = document.getElementById("regPassword").value;
         const confirm = document.getElementById("regConfirmPassword").value;
-        const farmName = document.getElementById("regFarmName").value;
-        if (!name || !email || !password || !farmName) { showToast("Fill all fields", true); return; }
-        if (password !== confirm) { showToast("Passwords don't match", true); return; }
-        if (password.length < 6) { showToast("Password min 6 chars", true); return; }
+        const farmName = document.getElementById("regFarmName").value.trim();
+        if (!name || !email || !password || !farmName) { showErrorMsg("Fill all fields"); return; }
+        if (password !== confirm) { showErrorMsg("Passwords don't match"); return; }
+        if (password.length < 6) { showErrorMsg("Password must be at least 6 characters"); return; }
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(cred.user, { displayName: name });
@@ -960,41 +1097,59 @@
                 createdAt: new Date().toISOString() 
             });
             showSuccessModalWithRedirect(`Welcome ${name}! Your account has been created successfully for ${farmName}.`, true);
-        } catch(e) { showToast(e.message, true); }
+        } catch(e) { 
+            let msg = e.message;
+            if (e.code === 'auth/email-already-in-use') msg = "Email already registered. Please login.";
+            showErrorMsg(msg);
+        }
     });
     
     document.getElementById("showRegisterBtn")?.addEventListener("click", () => {
         document.getElementById("loginForm").classList.add("hidden");
         document.getElementById("registerForm").classList.remove("hidden");
+        document.getElementById("errorMsg")?.classList.add("hidden");
     });
     
     document.getElementById("showLoginBtn")?.addEventListener("click", () => {
         document.getElementById("registerForm").classList.add("hidden");
         document.getElementById("loginForm").classList.remove("hidden");
+        document.getElementById("errorMsg")?.classList.add("hidden");
     });
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             currentUserRole = ADMIN_EMAILS.includes(user.email) ? "admin" : "user";
-            document.getElementById("userEmailDisplay").innerHTML = `${user.email}`;
+            const userEmailSpan = document.getElementById("userEmailDisplay");
+            if (userEmailSpan) userEmailSpan.innerHTML = `${user.email}`;
             const roleBadge = document.getElementById("roleBadge");
-            if (currentUserRole === "admin") {
-                roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
-                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold admin-badge";
-                document.getElementById("adminTabBtn").classList.remove("hidden");
-            } else {
-                roleBadge.innerHTML = '<i class="fas fa-user mr-1"></i> User';
-                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
-                document.getElementById("adminTabBtn").classList.add("hidden");
+            if (roleBadge) {
+                if (currentUserRole === "admin") {
+                    roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
+                    roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold admin-badge";
+                    const adminTabBtn = document.getElementById("adminTabBtn");
+                    if (adminTabBtn) adminTabBtn.classList.remove("hidden");
+                } else {
+                    roleBadge.innerHTML = '<i class="fas fa-user mr-1"></i> User';
+                    roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
+                    const adminTabBtn = document.getElementById("adminTabBtn");
+                    if (adminTabBtn) adminTabBtn.classList.add("hidden");
+                }
             }
-            document.getElementById("authModal").classList.add("hidden");
-            document.getElementById("mainApp").classList.remove("hidden");
+            const authModal = document.getElementById("authModal");
+            const mainApp = document.getElementById("mainApp");
+            if (authModal) authModal.classList.add("hidden");
+            if (mainApp) mainApp.classList.remove("hidden");
             startRealtimeListeners();
             await loadFlockSettings();
         } else {
-            document.getElementById("authModal").classList.remove("hidden");
-            document.getElementById("mainApp").classList.add("hidden");
+            const authModal = document.getElementById("authModal");
+            const mainApp = document.getElementById("mainApp");
+            if (authModal) authModal.classList.remove("hidden");
+            if (mainApp) mainApp.classList.add("hidden");
+            // Clear form fields
+            document.getElementById("loginEmail").value = "";
+            document.getElementById("loginPassword").value = "";
         }
     });
 </script>
