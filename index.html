@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>PoultryFlow Pro | Admin & User Portal</title>
-    <!-- Firebase SDKs -->
+    <title>PoultryFlow Pro | Complete Farm Management</title>
+    <!-- Firebase SDKs for Realtime Database -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+            }
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { transition: all 0.2s ease; }
         body { background: linear-gradient(135deg, #f0f4f0 0%, #e8ece8 100%); min-height: 100vh; }
-        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 20px 25px -12px rgba(0,0,0,0.15); }
         input, select, textarea {
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
@@ -33,13 +41,6 @@
             border: none;
         }
         .btn-primary:hover { background: linear-gradient(135deg, #166534 0%, #14532d 100%); transform: scale(1.02); }
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-        }
         .tab-active {
             border-bottom: 3px solid #15803d;
             color: #15803d;
@@ -61,55 +62,100 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        .loading-spinner {
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #15803d;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .auth-card {
-            background: white;
-            max-width: 450px;
-            width: 90%;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            animation: fadeInUp 0.4s ease;
-        }
-        @keyframes fadeInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
         .hidden { display: none !important; }
         .admin-badge { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
         .user-badge { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; }
         .role-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
         .role-admin { background: #ede9fe; color: #6d28d9; }
         .role-user { background: #d1fae5; color: #065f46; }
+        
+        .success-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-modal {
+            background: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: bounceIn 0.5s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .success-icon i { font-size: 3rem; color: white; }
+        
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .refresh-btn {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .refresh-btn:hover { background: #e5e7eb; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        tr:hover {
+            background-color: #f9fafb;
+        }
     </style>
 </head>
 <body>
 
 <!-- Authentication Modal -->
-<div id="authModal" class="auth-overlay">
-    <div class="auth-card">
+<div id="authModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
         <div class="text-center mb-6">
             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-egg text-green-600 text-4xl"></i>
@@ -118,187 +164,361 @@
             <p class="text-gray-500 text-sm mt-1">Smart poultry farm management</p>
         </div>
         
-        <div id="errorMsg" class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 hidden text-sm"></div>
-        <div id="successMsg" class="bg-green-50 text-green-700 p-3 rounded-lg mb-4 hidden text-sm"></div>
-        
         <div id="loginForm">
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" id="loginEmail" class="w-full" placeholder="farmer@example.com">
+                <input type="email" id="loginEmail" class="w-full border rounded-lg p-3" placeholder="Email Address">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" id="loginPassword" class="w-full" placeholder="••••••••">
+                <input type="password" id="loginPassword" class="w-full border rounded-lg p-3" placeholder="Password">
             </div>
-            <button id="loginBtn" class="btn-primary w-full"><i class="fas fa-sign-in-alt mr-2"></i>Sign In</button>
-            <p class="text-center text-sm text-gray-600 mt-4">New to PoultryFlow? <button id="showRegisterBtn" class="text-green-700 font-semibold">Create Account</button></p>
+            <div class="mb-4 flex items-center gap-2">
+                <input type="checkbox" id="rememberMe" class="w-4 h-4">
+                <label class="text-sm text-gray-600">Remember me</label>
+            </div>
+            <button id="loginBtn" class="btn-primary w-full py-3">Sign In</button>
+            <p class="text-center text-sm text-gray-600 mt-4">New user? <button id="showRegisterBtn" class="text-green-700 font-semibold">Create Account</button></p>
         </div>
         
         <div id="registerForm" class="hidden">
-            <div class="mb-3"><input type="text" id="regName" class="w-full" placeholder="Full Name"></div>
-            <div class="mb-3"><input type="email" id="regEmail" class="w-full" placeholder="Email Address"></div>
-            <div class="mb-3"><input type="password" id="regPassword" class="w-full" placeholder="Password (min 6)"></div>
-            <div class="mb-3"><input type="password" id="regConfirmPassword" class="w-full" placeholder="Confirm Password"></div>
-            <div class="mb-4"><input type="text" id="regFarmName" class="w-full" placeholder="Farm/Business Name"></div>
-            <button id="registerBtn" class="btn-primary w-full"><i class="fas fa-user-plus mr-2"></i>Create Account</button>
-            <p class="text-center text-sm text-gray-600 mt-4">Already have an account? <button id="showLoginBtn" class="text-green-700 font-semibold">Sign In</button></p>
+            <div class="mb-3"><input type="text" id="regName" class="w-full border rounded-lg p-3" placeholder="Full Name"></div>
+            <div class="mb-3"><input type="email" id="regEmail" class="w-full border rounded-lg p-3" placeholder="Email"></div>
+            <div class="mb-3"><input type="password" id="regPassword" class="w-full border rounded-lg p-3" placeholder="Password (min 6)"></div>
+            <div class="mb-3"><input type="password" id="regConfirmPassword" class="w-full border rounded-lg p-3" placeholder="Confirm Password"></div>
+            <div class="mb-4"><input type="text" id="regFarmName" class="w-full border rounded-lg p-3" placeholder="Farm Name"></div>
+            <button id="registerBtn" class="btn-primary w-full py-3">Create Account</button>
+            <p class="text-center text-sm text-gray-600 mt-4">Have account? <button id="showLoginBtn" class="text-green-700 font-semibold">Sign In</button></p>
         </div>
     </div>
 </div>
 
+<!-- Success Modal -->
+<div id="successModal" class="success-modal-overlay hidden">
+    <div class="success-modal">
+        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+        <h2 id="successTitle" class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
+        <p id="successMessage" class="text-gray-600 mb-4">Operation completed successfully</p>
+        <div id="redirectCountdown" class="text-sm text-gray-500 mb-4 hidden">Redirecting to Dashboard in <span id="countdownSec">3</span> seconds...</div>
+        <button id="closeSuccessModal" class="btn-primary w-full">Continue</button>
+    </div>
+</div>
+
 <!-- Main App -->
-<div id="mainApp" class="hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="bg-white rounded-2xl shadow-sm p-4 mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+<div id="mainApp" class="hidden max-w-7xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-sm p-4 mb-6">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-egg text-green-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">PoultryFlow Pro</h1>
+                    <p class="text-gray-500 text-sm">Real-time analytics & farm management</p>
+                </div>
+            </div>
+            <div class="flex gap-3 items-center flex-wrap">
+                <div class="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full">
+                    <i class="fas fa-user-circle text-green-600"></i>
+                    <span id="userEmailDisplay" class="text-sm font-medium">Loading...</span>
+                </div>
+                <div id="roleBadge" class="px-3 py-1 rounded-full text-xs font-semibold admin-badge">Admin</div>
+                <button id="exportReportBtn" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
+                    <i class="fas fa-download mr-1"></i> Export
+                </button>
+                <button id="logoutBtn" class="bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-100">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-xl shadow-sm mb-6">
+        <div class="flex gap-2 p-2 overflow-x-auto">
+            <button data-tab="dashboard" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium tab-active">
+                <i class="fas fa-chart-line mr-2"></i>Dashboard
+            </button>
+            <button data-tab="daily" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium">
+                <i class="fas fa-clipboard-list mr-2"></i>Daily Production
+            </button>
+            <button data-tab="sales" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium">
+                <i class="fas fa-dollar-sign mr-2"></i>Sales
+            </button>
+            <button data-tab="expenses" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium">
+                <i class="fas fa-receipt mr-2"></i>Expenses
+            </button>
+            <button data-tab="flock" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium">
+                <i class="fas fa-users mr-2"></i>Flock Settings
+            </button>
+            <button id="adminTabBtn" data-tab="admin" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium hidden">
+                <i class="fas fa-crown mr-2"></i>Admin Panel
+            </button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-section" class="tab-content">
+        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+            <div class="flex flex-wrap justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-egg text-green-600 text-2xl"></i></div>
-                    <div><h1 class="text-2xl font-bold text-gray-800">PoultryFlow Pro</h1><p class="text-gray-500 text-sm">Real-time analytics & farm management</p></div>
-                </div>
-                <div class="flex gap-3 items-center flex-wrap">
-                    <div class="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full"><i class="fas fa-user-circle text-green-600"></i><span id="userEmailDisplay" class="text-sm text-gray-700 font-medium">Loading...</span></div>
-                    <div id="roleBadge" class="px-3 py-1 rounded-full text-xs font-semibold admin-badge"><i class="fas fa-crown mr-1"></i> Admin</div>
-                    <button id="exportReportBtn" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-100"><i class="fas fa-download mr-1"></i> Export</button>
-                    <button id="logoutBtn" class="bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-100"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
+                    <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                    <span class="font-semibold">Select Month:</span>
+                    <input type="month" id="dashboardMonth" class="border rounded-lg px-3 py-2 w-44" value="2026-06">
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-sm mb-6">
-            <div class="flex gap-2 p-2 overflow-x-auto">
-                <button data-tab="dashboard" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium tab-active"><i class="fas fa-chart-line mr-2"></i>Dashboard</button>
-                <button data-tab="daily" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Daily Production</button>
-                <button data-tab="sales" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium"><i class="fas fa-dollar-sign mr-2"></i>Sales</button>
-                <button data-tab="expenses" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium"><i class="fas fa-receipt mr-2"></i>Expenses</button>
-                <button data-tab="flock" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium"><i class="fas fa-users mr-2"></i>Flock Settings</button>
-                <button id="adminTabBtn" data-tab="admin" class="tab-btn px-5 py-2.5 rounded-lg text-gray-600 font-medium hidden"><i class="fas fa-crown mr-2"></i>Admin Panel</button>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-l-4 border-green-500">
+                <div class="text-gray-500 text-sm">Total Eggs</div>
+                <div class="text-3xl font-bold text-gray-800" id="kpiTotalEggs">0</div>
+            </div>
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-l-4 border-blue-500">
+                <div class="text-gray-500 text-sm">Feed Used (kg)</div>
+                <div class="text-3xl font-bold text-gray-800" id="kpiFeedUsed">0</div>
+            </div>
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-l-4 border-yellow-500">
+                <div class="text-gray-500 text-sm">Avg Laying Rate</div>
+                <div class="text-3xl font-bold text-gray-800" id="kpiLayingRate">0%</div>
+            </div>
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-l-4 border-red-500">
+                <div class="text-gray-500 text-sm">Mortality</div>
+                <div class="text-3xl font-bold text-gray-800" id="kpiMortality">0</div>
             </div>
         </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <div class="stat-card bg-white shadow-sm rounded-xl p-5">
+                <h3 class="font-semibold text-gray-700"><i class="fas fa-dollar-sign text-green-600 mr-2"></i>Gross Revenue</h3>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="financeRevenue">KES 0</p>
+            </div>
+            <div class="stat-card bg-white shadow-sm rounded-xl p-5">
+                <h3 class="font-semibold text-gray-700"><i class="fas fa-receipt text-red-500 mr-2"></i>Total Expenses</h3>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="financeExpenses">KES 0</p>
+            </div>
+            <div class="stat-card bg-white shadow-sm rounded-xl p-5">
+                <h3 class="font-semibold text-gray-700"><i class="fas fa-chart-line text-purple-600 mr-2"></i>Net Profit</h3>
+                <p class="text-3xl font-bold mt-2" id="financeProfit">KES 0</p>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm p-5">
+            <canvas id="eggTrendChart" height="80"></canvas>
+        </div>
+    </div>
 
-        <!-- DASHBOARD -->
-        <div id="dashboard-section" class="tab-content">
-            <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-                <div class="flex flex-wrap justify-between items-center gap-4">
-                    <div class="flex items-center gap-3"><i class="fas fa-calendar-alt text-green-600 text-xl"></i><span class="font-semibold">Select Month:</span><input type="month" id="dashboardMonth" class="border-gray-300 rounded-lg px-3 py-2 w-44" value="2026-06"></div>
-                    <div class="text-sm text-green-600 bg-green-50 px-4 py-2 rounded-full"><i class="fas fa-chart-line mr-1"></i> Live analytics</div>
+    <!-- DAILY PRODUCTION -->
+    <div id="daily-section" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Add Daily Record</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="dailyDate" class="w-full border rounded-lg p-2"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Active Birds</label><input type="number" id="activeBirds" class="w-full border rounded-lg p-2" placeholder="Number of birds"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Eggs Collected</label><input type="number" id="eggsCollected" class="w-full border rounded-lg p-2" placeholder="Total eggs"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Damaged Eggs</label><input type="number" id="damagedEggs" class="w-full border rounded-lg p-2" placeholder="Damaged" value="0"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Feed Consumed (kg)</label><input type="number" step="0.1" id="feedKg" class="w-full border rounded-lg p-2" placeholder="Feed in kg"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Mortality</label><input type="number" id="mortalityCount" class="w-full border rounded-lg p-2" placeholder="Bird deaths" value="0"></div>
+            </div>
+            <button id="addDailyEntry" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-save mr-2"></i> Save Record</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b">
+                        <th class="p-3 text-left">Date</th>
+                        <th class="p-3 text-left">Active Birds</th>
+                        <th class="p-3 text-left">Eggs</th>
+                        <th class="p-3 text-left">Damaged</th>
+                        <th class="p-3 text-left">Good Eggs</th>
+                        <th class="p-3 text-left">Laying Rate</th>
+                        <th class="p-3 text-left">Feed(kg)</th>
+                        <th class="p-3 text-left">Mortality</th>
+                        <th class="p-3 text-left">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyTableBody">
+                    <tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SALES -->
+    <div id="sales-section" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Record Sale</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="saleDate" class="w-full border rounded-lg p-2"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Item Type</label><select id="saleItemType" class="w-full border rounded-lg p-2"><option>Eggs (Crates)</option><option>Eggs (Single)</option><option>Culled Birds</option><option>Broilers</option></select></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="saleQuantity" class="w-full border rounded-lg p-2" placeholder="Quantity"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (KES)</label><input type="number" id="saleUnitPrice" class="w-full border rounded-lg p-2" placeholder="Price per unit"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer</label><input type="text" id="customerProfile" class="w-full border rounded-lg p-2" placeholder="Customer name"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label><select id="paymentStatus" class="w-full border rounded-lg p-2"><option>Paid</option><option>Credit/Pending</option></select></div>
+            </div>
+            <button id="addSaleBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Sale</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b">
+                        <th class="p-3 text-left">Date</th>
+                        <th class="p-3 text-left">Item Type</th>
+                        <th class="p-3 text-left">Quantity</th>
+                        <th class="p-3 text-left">Unit Price</th>
+                        <th class="p-3 text-left">Total (KES)</th>
+                        <th class="p-3 text-left">Customer</th>
+                        <th class="p-3 text-left">Status</th>
+                        <th class="p-3 text-left">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="salesTableBody">
+                    <tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div id="expenses-section" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Record Expense</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" id="expenseDate" class="w-full border rounded-lg p-2"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Category</label><select id="expenseCategory" class="w-full border rounded-lg p-2"><option>Feed</option><option>Vet/Medication</option><option>Labour</option><option>Utilities</option><option>Transport</option><option>Chicks Bought</option><option>Equipment</option><option>Other</option></select></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="expenseDesc" class="w-full border rounded-lg p-2" placeholder="Description"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="expenseQty" class="w-full border rounded-lg p-2" placeholder="Quantity" value="1"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Cost (KES)</label><input type="number" id="expenseTotalCost" class="w-full border rounded-lg p-2" placeholder="Total cost"></div>
+            </div>
+            <button id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b">
+                        <th class="p-3 text-left">Date</th>
+                        <th class="p-3 text-left">Category</th>
+                        <th class="p-3 text-left">Description</th>
+                        <th class="p-3 text-left">Quantity</th>
+                        <th class="p-3 text-left">Total Cost (KES)</th>
+                        <th class="p-3 text-left">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="expensesTableBody">
+                    <tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FLOCK SETTINGS -->
+    <div id="flock-section" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl mx-auto">
+            <div class="text-center mb-6">
+                <i class="fas fa-egg text-green-600 text-5xl"></i>
+                <h2 class="text-2xl font-bold mt-3">Flock Configuration</h2>
+                <p class="text-gray-500 text-sm">Manage your flock settings</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Flock Name</label>
+                    <input type="text" id="flockName" class="w-full border rounded-lg p-2" placeholder="e.g., Batch A-2026">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Bird Type</label>
+                    <select id="birdType" class="w-full border rounded-lg p-2">
+                        <option>Layers (Egg Production)</option>
+                        <option>Broilers (Meat Production)</option>
+                        <option>Dual Purpose</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Total Birds</label>
+                    <input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Housing Type</label>
+                    <select id="housingType" class="w-full border rounded-lg p-2">
+                        <option>Free Range</option><option>Barn</option><option>Cage System</option><option>Pasture Raised</option>
+                    </select>
+                </div>
+                <button id="updateFlockBtn" class="btn-primary w-full py-3"><i class="fas fa-save mr-2"></i> Save Settings</button>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-4 border-green-500"><div class="text-gray-500 text-sm">Total Eggs</div><div class="text-3xl font-bold" id="kpiTotalEggs">0</div></div>
-                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-4 border-blue-500"><div class="text-gray-500 text-sm">Feed Used (kg)</div><div class="text-3xl font-bold" id="kpiFeedUsed">0</div></div>
-                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-4 border-yellow-500"><div class="text-gray-500 text-sm">Laying Rate</div><div class="text-3xl font-bold" id="kpiLayingRate">0%</div></div>
-                <div class="bg-white rounded-2xl shadow-sm p-5 border-l-4 border-red-500"><div class="text-gray-500 text-sm">Mortality</div><div class="text-3xl font-bold" id="kpiMortality">0</div></div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-section" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold"><i class="fas fa-crown text-yellow-500 mr-2"></i>Admin Dashboard</h2>
+                <button id="refreshAdminBtn" class="refresh-btn"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                <div class="bg-white shadow-sm rounded-xl p-5"><h3 class="font-semibold"><i class="fas fa-dollar-sign text-green-600 mr-2"></i>Gross Revenue</h3><p class="text-3xl font-bold" id="financeRevenue">KES 0</p></div>
-                <div class="bg-white shadow-sm rounded-xl p-5"><h3 class="font-semibold"><i class="fas fa-receipt text-red-500 mr-2"></i>Total Expenses</h3><p class="text-3xl font-bold" id="financeExpenses">KES 0</p></div>
-                <div class="bg-white shadow-sm rounded-xl p-5"><h3 class="font-semibold"><i class="fas fa-chart-line text-purple-600 mr-2"></i>Net Profit</h3><p class="text-3xl font-bold" id="financeProfit">KES 0</p></div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5"><canvas id="eggTrendChart" height="80"></canvas></div>
-        </div>
-
-        <!-- DAILY PRODUCTION -->
-        <div id="daily-section" class="tab-content hidden">
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-5">Add Daily Record</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <input type="date" id="dailyDate" class="w-full"><input type="number" id="activeBirds" placeholder="Active Birds" class="w-full">
-                    <input type="number" id="eggsCollected" placeholder="Eggs Collected" class="w-full"><input type="number" id="damagedEggs" placeholder="Damaged Eggs" class="w-full" value="0">
-                    <input type="number" step="0.1" id="feedKg" placeholder="Feed (kg)" class="w-full"><input type="number" id="mortalityCount" placeholder="Mortality" class="w-full" value="0">
+                <div class="bg-purple-50 rounded-xl p-5 text-center">
+                    <i class="fas fa-users text-purple-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold" id="totalUsers">0</h3>
+                    <p class="text-gray-600 text-sm">Total Users</p>
                 </div>
-                <button id="addDailyEntry" class="btn-primary mt-5"><i class="fas fa-save mr-2"></i> Save Record</button>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-                <table class="min-w-full text-sm"><thead class="bg-gray-50"><tr><th class="p-3">Date</th><th>Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed</th><th>Mortality</th><th></th></tr></thead>
-                <tbody id="dailyTableBody"></tbody></table>
-            </div>
-        </div>
-
-        <!-- SALES -->
-        <div id="sales-section" class="tab-content hidden">
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-5">Record Sale</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <input type="date" id="saleDate" class="w-full"><select id="saleItemType" class="w-full"><option>Eggs (Crates)</option><option>Eggs (Single)</option><option>Culled Birds</option><option>Broilers</option></select>
-                    <input type="number" id="saleQuantity" placeholder="Quantity" class="w-full"><input type="number" id="saleUnitPrice" placeholder="Unit Price (KES)" class="w-full">
-                    <input type="text" id="customerProfile" placeholder="Customer" class="w-full"><select id="paymentStatus" class="w-full"><option>Paid</option><option>Credit/Pending</option></select>
+                <div class="bg-blue-50 rounded-xl p-5 text-center">
+                    <i class="fas fa-database text-blue-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold" id="totalRecords">0</h3>
+                    <p class="text-gray-600 text-sm">Total Records</p>
                 </div>
-                <button id="addSaleBtn" class="btn-primary mt-5"><i class="fas fa-plus mr-2"></i> Add Sale</button>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-50"><tr><th>Date</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Customer</th><th>Status</th><th></th></tr></thead><tbody id="salesTableBody"></tbody></table></div>
-        </div>
-
-        <!-- EXPENSES -->
-        <div id="expenses-section" class="tab-content hidden">
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-5">Record Expense</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <input type="date" id="expenseDate" class="w-full"><select id="expenseCategory" class="w-full"><option>Feed</option><option>Vet/Medication</option><option>Labour</option><option>Utilities</option><option>Transport</option><option>Chicks Bought</option></select>
-                    <input type="text" id="expenseDesc" placeholder="Description" class="w-full"><input type="number" id="expenseQty" placeholder="Quantity" class="w-full" value="1">
-                    <input type="number" id="expenseTotalCost" placeholder="Total Cost (KES)" class="w-full">
+                <div class="bg-green-50 rounded-xl p-5 text-center">
+                    <i class="fas fa-chart-line text-green-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold" id="activeUsers">0</h3>
+                    <p class="text-gray-600 text-sm">Active Users</p>
                 </div>
-                <button id="addExpenseBtn" class="btn-primary mt-5"><i class="fas fa-plus mr-2"></i> Add Expense</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-50"><tr><th>Date</th><th>Category</th><th>Description</th><th>Qty</th><th>Total</th><th></th></tr></thead><tbody id="expensesTableBody"></tbody></table></div>
-        </div>
-
-        <!-- FLOCK SETTINGS -->
-        <div id="flock-section" class="tab-content hidden">
-            <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl mx-auto">
-                <div class="text-center mb-6"><i class="fas fa-egg text-green-600 text-5xl"></i><h2 class="text-2xl font-bold mt-3">Flock Configuration</h2></div>
-                <div><label class="block text-sm font-medium mb-1">Flock Name</label><input type="text" id="flockName" class="w-full mb-4" placeholder="e.g., Batch A-2026"></div>
-                <div><label class="block text-sm font-medium mb-1">Bird Type</label><select id="birdType" class="w-full mb-4"><option>Layers (Egg Production)</option><option>Broilers (Meat Production)</option></select></div>
-                <button id="updateFlockBtn" class="btn-primary w-full"><i class="fas fa-save mr-2"></i> Save Settings</button>
-            </div>
-        </div>
-
-        <!-- ADMIN PANEL -->
-        <div id="admin-section" class="tab-content hidden">
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-2xl font-bold mb-4"><i class="fas fa-crown text-yellow-500 mr-2"></i>Admin Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                    <div class="bg-purple-50 rounded-xl p-5 text-center"><i class="fas fa-users text-purple-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="totalUsers">0</h3><p class="text-gray-600 text-sm">Total Users</p></div>
-                    <div class="bg-blue-50 rounded-xl p-5 text-center"><i class="fas fa-database text-blue-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="totalRecords">0</h3><p class="text-gray-600 text-sm">Total Records</p></div>
-                    <div class="bg-green-50 rounded-xl p-5 text-center"><i class="fas fa-chart-line text-green-600 text-3xl mb-2"></i><h3 class="text-2xl font-bold" id="activeUsers">0</h3><p class="text-gray-600 text-sm">Active Users</p></div>
-                </div>
-                <h3 class="text-xl font-semibold mb-4">All Registered Users</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-50"><tr><th class="p-3 text-left">Email</th><th class="p-3 text-left">Farm Name</th><th class="p-3 text-left">Role</th><th class="p-3 text-left">Joined</th></tr></thead>
-                        <tbody id="adminUsersTableBody"></tbody>
-                    </table>
-                </div>
+            
+            <h3 class="text-xl font-semibold mb-4">All Registered Users</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="p-3 text-left">Email</th>
+                            <th class="p-3 text-left">Full Name</th>
+                            <th class="p-3 text-left">Farm Name</th>
+                            <th class="p-3 text-left">Role</th>
+                            <th class="p-3 text-left">Joined Date</th>
+                            <th class="p-3 text-left">Records</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUsersTableBody">
+                        <tr><td colspan="6" class="text-center p-8 text-gray-400">Loading users...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, setDoc, getDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { initializeApp } from "firebase/app";
+    import { getDatabase, ref, set, push, onValue, remove, get } from "firebase/database";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyDLiyxlQNcBXH9WkrJlZKhE7XwTWf_8rCA",
-    authDomain: "poutry-569e6.firebaseapp.com",
-    projectId: "poutry-569e6",
-    storageBucket: "poutry-569e6.firebasestorage.app",
-    messagingSenderId: "297732089999",
-    appId: "1:297732089999:web:47543c3e2b4d28d84de8fa",
-    databaseURL: "https://poutry-569e6-default-rtdb.europe-west1.firebasedatabase.app" // Added databaseURL
-};
+        apiKey: "AIzaSyDLiyxlQNcBXH9WkrJlZKhE7XwTWf_8rCA",
+        authDomain: "poutry-569e6.firebaseapp.com",
+        databaseURL: "https://poutry-569e6-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "poutry-569e6",
+        storageBucket: "poutry-569e6.firebasestorage.app",
+        messagingSenderId: "297732089999",
+        appId: "1:297732089999:web:47543c3e2b4d28d84de8fa"
+    };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getDatabase(app);
     const auth = getAuth(app);
 
     let currentUser = null;
     let currentUserRole = "user";
     let currentDaily = [], currentSales = [], currentExpenses = [];
-    let dailyUnsubscribe, salesUnsubscribe, expensesUnsubscribe;
     let currentChart = null;
+    let redirectTimer = null;
 
-    // Admin emails list - add admin emails here
     const ADMIN_EMAILS = ["admin@poultryflow.com", "bit003623@student.kibu.ac.ke"];
 
     function showToast(msg, isError = false) {
@@ -309,59 +529,203 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    function getUserDailyCol() { return collection(db, "users", currentUser.uid, "dailyProduction"); }
-    function getUserSalesCol() { return collection(db, "users", currentUser.uid, "salesLog"); }
-    function getUserExpensesCol() { return collection(db, "users", currentUser.uid, "expensesLog"); }
-    function getUserFlockDoc() { return doc(db, "users", currentUser.uid, "config", "flockSettings"); }
+    function showSuccessModalWithRedirect(message, redirectToDashboard = true) {
+        const modal = document.getElementById("successModal");
+        document.getElementById("successMessage").textContent = message;
+        document.getElementById("successTitle").textContent = "Success!";
+        
+        if (redirectToDashboard) {
+            const countdownDiv = document.getElementById("redirectCountdown");
+            const countdownSpan = document.getElementById("countdownSec");
+            countdownDiv.classList.remove("hidden");
+            
+            let seconds = 3;
+            countdownSpan.textContent = seconds;
+            
+            if (redirectTimer) clearInterval(redirectTimer);
+            redirectTimer = setInterval(() => {
+                seconds--;
+                countdownSpan.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(redirectTimer);
+                    modal.classList.add("hidden");
+                    countdownDiv.classList.add("hidden");
+                    document.querySelectorAll(".tab-btn").forEach(btn => {
+                        if (btn.getAttribute("data-tab") === "dashboard") {
+                            btn.click();
+                        }
+                    });
+                }
+            }, 1000);
+        } else {
+            document.getElementById("redirectCountdown").classList.add("hidden");
+        }
+        
+        modal.classList.remove("hidden");
+        
+        document.getElementById("closeSuccessModal").onclick = () => {
+            if (redirectTimer) clearInterval(redirectTimer);
+            modal.classList.add("hidden");
+            document.getElementById("redirectCountdown").classList.add("hidden");
+            if (redirectToDashboard) {
+                document.querySelectorAll(".tab-btn").forEach(btn => {
+                    if (btn.getAttribute("data-tab") === "dashboard") {
+                        btn.click();
+                    }
+                });
+            }
+        };
+        
+        if (!redirectToDashboard) {
+            setTimeout(() => modal.classList.add("hidden"), 3000);
+        }
+    }
 
-    function renderDailyTable(data) {
+    function resetDailyForm() {
+        document.getElementById("dailyDate").value = new Date().toISOString().split('T')[0];
+        document.getElementById("activeBirds").value = "";
+        document.getElementById("eggsCollected").value = "";
+        document.getElementById("damagedEggs").value = "0";
+        document.getElementById("feedKg").value = "";
+        document.getElementById("mortalityCount").value = "0";
+    }
+
+    function resetSalesForm() {
+        document.getElementById("saleDate").value = new Date().toISOString().split('T')[0];
+        document.getElementById("saleItemType").value = "Eggs (Crates)";
+        document.getElementById("saleQuantity").value = "";
+        document.getElementById("saleUnitPrice").value = "";
+        document.getElementById("customerProfile").value = "";
+        document.getElementById("paymentStatus").value = "Paid";
+    }
+
+    function resetExpensesForm() {
+        document.getElementById("expenseDate").value = new Date().toISOString().split('T')[0];
+        document.getElementById("expenseCategory").value = "Feed";
+        document.getElementById("expenseDesc").value = "";
+        document.getElementById("expenseQty").value = "1";
+        document.getElementById("expenseTotalCost").value = "";
+    }
+
+    function resetFlockForm() {
+        document.getElementById("flockName").value = "";
+        document.getElementById("birdType").value = "Layers (Egg Production)";
+        document.getElementById("totalBirds").value = "";
+        document.getElementById("housingType").value = "Free Range";
+    }
+
+    function getUserDailyRef() { return ref(db, `users/${currentUser.uid}/dailyProduction`); }
+    function getUserSalesRef() { return ref(db, `users/${currentUser.uid}/salesLog`); }
+    function getUserExpensesRef() { return ref(db, `users/${currentUser.uid}/expensesLog`); }
+    function getUserFlockRef() { return ref(db, `users/${currentUser.uid}/config/flockSettings`); }
+
+    function renderDailyTable() {
         const tbody = document.getElementById("dailyTableBody");
         if (!tbody) return;
-        if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>'; return; }
-        const sorted = [...data].sort((a,b) => new Date(b.date) - new Date(a.date));
+        if (currentDaily.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>';
+            return; 
+        }
+        const sorted = [...currentDaily].sort((a,b) => new Date(b.date) - new Date(a.date));
         tbody.innerHTML = sorted.map(entry => {
             const goodEggs = (entry.eggsCollected || 0) - (entry.damagedEggs || 0);
-            const layingRate = entry.activeBirds ? ((entry.eggsCollected / entry.activeBirds)*100).toFixed(1) : 0;
-            return `<tr class="border-b"><td class="p-3">${entry.date}<td class="p-3">${entry.activeBirds}<td class="p-3">${entry.eggsCollected}<td class="p-3">${entry.damagedEggs||0}<td class="p-3 font-semibold text-green-600">${goodEggs}<td class="p-3">${layingRate}%<td class="p-3">${entry.feedKg}<td class="p-3">${entry.mortality||0}<td class="p-3"><button class="delete-daily text-red-500" data-id="${entry.id}"><i class="fas fa-trash"></i></button>`;
-        }).join("");
-        document.querySelectorAll(".delete-daily").forEach(btn => btn.addEventListener("click", async () => {
-            if(confirm("Delete this record?")) { await deleteDoc(doc(db, "users", currentUser.uid, "dailyProduction", btn.dataset.id)); showToast("Deleted"); }
-        }));
+            const layingRate = entry.activeBirds && entry.activeBirds > 0 ? ((entry.eggsCollected / entry.activeBirds) * 100).toFixed(1) : 0;
+            return `<tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${entry.date}</td>
+                        <td class="p-3">${entry.activeBirds}</td>
+                        <td class="p-3">${entry.eggsCollected}</td>
+                        <td class="p-3 text-red-600">${entry.damagedEggs||0}</td>
+                        <td class="p-3 text-green-600 font-semibold">${goodEggs}</td>
+                        <td class="p-3 ${layingRate >= 70 ? 'text-green-600' : layingRate >= 50 ? 'text-yellow-600' : 'text-red-600'} font-semibold">${layingRate}%</td>
+                        <td class="p-3">${entry.feedKg||0}</td>
+                        <td class="p-3 text-red-600">${entry.mortality||0}</td>
+                        <td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td>
+                    </tr>`;
+        }).join('');
+        
+        document.querySelectorAll(".delete-daily").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                if(confirm("Delete this record?")) {
+                    await remove(ref(db, `users/${currentUser.uid}/dailyProduction/${btn.dataset.id}`));
+                    showToast("Record deleted");
+                }
+            });
+        });
     }
 
-    function renderSalesTable(data) {
+    function renderSalesTable() {
         const tbody = document.getElementById("salesTableBody");
-        if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td></tr>'; return; }
-        const sorted = [...data].sort((a,b)=>new Date(b.date)-new Date(a.date));
-        tbody.innerHTML = sorted.map(s => `<tr class="border-b"><td class="p-3">${s.date}<td class="p-3">${s.itemType}<td class="p-3">${s.quantity}<td class="p-3">KES ${s.unitPrice}<td class="p-3 font-semibold text-green-600">KES ${s.total}<td class="p-3">${s.customer || '-'}<td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span><td class="p-3"><button class="delete-sale text-red-500" data-id="${s.id}"><i class="fas fa-trash"></i></button>`).join("");
-        document.querySelectorAll(".delete-sale").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete?")) { await deleteDoc(doc(db, "users", currentUser.uid, "salesLog", btn.dataset.id)); showToast("Deleted"); } }));
+        if (currentSales.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No sales yet</td></tr>';
+            return; 
+        }
+        const sorted = [...currentSales].sort((a,b) => new Date(b.date) - new Date(a.date));
+        tbody.innerHTML = sorted.map(s => `<tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${s.date}</td>
+                    <td class="p-3">${s.itemType}</td>
+                    <td class="p-3">${s.quantity}</td>
+                    <td class="p-3">KES ${s.unitPrice}</td>
+                    <td class="p-3 text-green-600 font-semibold">KES ${s.total}</td>
+                    <td class="p-3">${s.customer || '-'}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td>
+                    <td class="p-3"><button class="delete-sale text-red-500 hover:text-red-700" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>`).join('');
+        
+        document.querySelectorAll(".delete-sale").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                if(confirm("Delete this sale?")) {
+                    await remove(ref(db, `users/${currentUser.uid}/salesLog/${btn.dataset.id}`));
+                    showToast("Sale deleted");
+                }
+            });
+        });
     }
 
-    function renderExpensesTable(data) {
+    function renderExpensesTable() {
         const tbody = document.getElementById("expensesTableBody");
-        if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>'; return; }
-        const sorted = [...data].sort((a,b)=>new Date(b.date)-new Date(a.date));
-        tbody.innerHTML = sorted.map(e => `<tr class="border-b"><td class="p-3">${e.date}<td class="p-3">${e.category}<td class="p-3">${e.description || '-'}<td class="p-3">${e.quantity}<td class="p-3 font-semibold text-red-600">KES ${e.totalCost}<td class="p-3"><button class="delete-exp text-red-500" data-id="${e.id}"><i class="fas fa-trash"></i></button>`).join("");
-        document.querySelectorAll(".delete-exp").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete?")) { await deleteDoc(doc(db, "users", currentUser.uid, "expensesLog", btn.dataset.id)); showToast("Deleted"); } }));
+        if (currentExpenses.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>';
+            return; 
+        }
+        const sorted = [...currentExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+        tbody.innerHTML = sorted.map(e => `<tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${e.date}</td>
+                    <td class="p-3">${e.category}</td>
+                    <td class="p-3">${e.description || '-'}</td>
+                    <td class="p-3">${e.quantity}</td>
+                    <td class="p-3 text-red-600 font-semibold">KES ${e.totalCost}</td>
+                    <td class="p-3"><button class="delete-exp text-red-500 hover:text-red-700" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>`).join('');
+        
+        document.querySelectorAll(".delete-exp").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                if(confirm("Delete this expense?")) {
+                    await remove(ref(db, `users/${currentUser.uid}/expensesLog/${btn.dataset.id}`));
+                    showToast("Expense deleted");
+                }
+            });
+        });
     }
 
     async function refreshDashboard() {
         const monthTarget = document.getElementById("dashboardMonth").value;
-        const filteredDaily = currentDaily.filter(d => d.date.startsWith(monthTarget));
-        const filteredSales = currentSales.filter(s => s.date.startsWith(monthTarget));
-        const filteredExpenses = currentExpenses.filter(e => e.date.startsWith(monthTarget));
+        const filteredDaily = currentDaily.filter(d => d.date && d.date.startsWith(monthTarget));
+        const filteredSales = currentSales.filter(s => s.date && s.date.startsWith(monthTarget));
+        const filteredExpenses = currentExpenses.filter(e => e.date && e.date.startsWith(monthTarget));
         
         const totalEggs = filteredDaily.reduce((s,d) => s + (d.eggsCollected || 0), 0);
         const totalFeed = filteredDaily.reduce((s,d) => s + (d.feedKg || 0), 0);
         const totalMortality = filteredDaily.reduce((s,d) => s + (d.mortality || 0), 0);
-        let rateSum = 0;
-        filteredDaily.forEach(d => { if(d.activeBirds) rateSum += (d.eggsCollected / d.activeBirds) * 100; });
-        const avgRate = filteredDaily.length ? (rateSum / filteredDaily.length).toFixed(1) : 0;
-        const revenue = filteredSales.reduce((s,item) => s + (item.total || (item.quantity * item.unitPrice)), 0);
+        
+        let rateSum = 0, rateCount = 0;
+        filteredDaily.forEach(d => { if(d.activeBirds && d.activeBirds > 0) { rateSum += (d.eggsCollected / d.activeBirds) * 100; rateCount++; } });
+        const avgRate = rateCount > 0 ? (rateSum / rateCount).toFixed(1) : 0;
+        
+        const revenue = filteredSales.reduce((s,item) => s + (item.total || 0), 0);
         const expense = filteredExpenses.reduce((s,e) => s + (e.totalCost || 0), 0);
         const profit = revenue - expense;
         
-        document.getElementById("kpiTotalEggs").innerText = totalEggs.toLocaleString();
+        document.getElementById("kpiTotalEggs").innerText = totalEggs;
         document.getElementById("kpiFeedUsed").innerText = totalFeed.toFixed(1);
         document.getElementById("kpiLayingRate").innerHTML = `${avgRate}%`;
         document.getElementById("kpiMortality").innerText = totalMortality;
@@ -369,7 +733,7 @@
         document.getElementById("financeExpenses").innerHTML = `KES ${expense.toLocaleString()}`;
         const profitEl = document.getElementById("financeProfit");
         profitEl.innerHTML = `KES ${profit.toLocaleString()}`;
-        profitEl.className = `text-3xl font-bold ${profit >=0 ? "text-green-600" : "text-red-600"}`;
+        profitEl.className = `text-3xl font-bold ${profit >= 0 ? "text-green-600" : "text-red-600"}`;
         
         const last14 = [...filteredDaily].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-14);
         const ctx = document.getElementById('eggTrendChart')?.getContext('2d');
@@ -379,56 +743,74 @@
         }
     }
 
-    function startListeners() {
-        if (dailyUnsubscribe) dailyUnsubscribe();
-        dailyUnsubscribe = onSnapshot(query(getUserDailyCol(), orderBy("date", "desc")), (snapshot) => {
-            currentDaily = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderDailyTable(currentDaily);
+    function startRealtimeListeners() {
+        onValue(getUserDailyRef(), (snapshot) => {
+            const data = snapshot.val();
+            currentDaily = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
+            renderDailyTable();
             refreshDashboard();
         });
-        salesUnsubscribe = onSnapshot(query(getUserSalesCol(), orderBy("date", "desc")), (snapshot) => {
-            currentSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderSalesTable(currentSales);
+        
+        onValue(getUserSalesRef(), (snapshot) => {
+            const data = snapshot.val();
+            currentSales = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
+            renderSalesTable();
             refreshDashboard();
         });
-        expensesUnsubscribe = onSnapshot(query(getUserExpensesCol(), orderBy("date", "desc")), (snapshot) => {
-            currentExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderExpensesTable(currentExpenses);
+        
+        onValue(getUserExpensesRef(), (snapshot) => {
+            const data = snapshot.val();
+            currentExpenses = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
+            renderExpensesTable();
             refreshDashboard();
         });
     }
 
     async function loadFlockSettings() {
-        const docRef = getUserFlockDoc();
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-            document.getElementById("flockName").value = snap.data().flockName || "My Flock";
-            document.getElementById("birdType").value = snap.data().birdType || "Layers (Egg Production)";
-        }
+        try {
+            const snapshot = await get(getUserFlockRef());
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById("flockName").value = data.flockName || "";
+                document.getElementById("birdType").value = data.birdType || "Layers (Egg Production)";
+                document.getElementById("totalBirds").value = data.totalBirds || "";
+                document.getElementById("housingType").value = data.housingType || "Free Range";
+            }
+        } catch (error) { console.error("Error loading flock:", error); }
     }
 
     async function loadAdminPanel() {
         if (currentUserRole !== "admin") return;
         try {
-            const usersRef = collection(db, "users");
-            const usersSnapshot = await getDocs(usersRef);
+            const usersSnapshot = await get(ref(db, "users"));
+            const usersData = usersSnapshot.val();
             const usersList = [];
-            let totalRecords = 0;
-            let activeCount = 0;
+            let totalRecords = 0, activeCount = 0;
             
-            for (const userDoc of usersSnapshot.docs) {
-                const userData = userDoc.data();
-                const dailySnap = await getDocs(collection(db, "users", userDoc.id, "dailyProduction"));
-                const recordCount = dailySnap.size;
-                totalRecords += recordCount;
-                if (recordCount > 0) activeCount++;
-                
-                usersList.push({
-                    email: userData.email || userDoc.id,
-                    farmName: userData.farmName || "Not set",
-                    role: ADMIN_EMAILS.includes(userData.email) ? "admin" : "user",
-                    joined: userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "Unknown"
-                });
+            if (usersData) {
+                for (const [uid, userData] of Object.entries(usersData)) {
+                    let userEmail = userData.email || "No email saved";
+                    let userFullName = userData.displayName || userData.fullName || "Not set";
+                    let userFarmName = userData.farmName || "Not set";
+                    let userRole = ADMIN_EMAILS.includes(userEmail) ? "admin" : "user";
+                    let joinedDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "Unknown";
+                    
+                    const dailyCount = userData.dailyProduction ? Object.keys(userData.dailyProduction).length : 0;
+                    const salesCount = userData.salesLog ? Object.keys(userData.salesLog).length : 0;
+                    const expensesCount = userData.expensesLog ? Object.keys(userData.expensesLog).length : 0;
+                    const recordCount = dailyCount + salesCount + expensesCount;
+                    totalRecords += recordCount;
+                    if (recordCount > 0) activeCount++;
+                    
+                    usersList.push({ 
+                        email: userEmail, 
+                        fullName: userFullName,
+                        farmName: userFarmName, 
+                        role: userRole, 
+                        joined: joinedDate, 
+                        records: recordCount 
+                    });
+                }
             }
             
             document.getElementById("totalUsers").innerText = usersList.length;
@@ -436,16 +818,26 @@
             document.getElementById("activeUsers").innerText = activeCount;
             
             const tbody = document.getElementById("adminUsersTableBody");
-            tbody.innerHTML = usersList.map(u => `
-                <tr class="border-b"><td class="p-3">${u.email}<td class="p-3">${u.farmName}<td class="p-3"><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span><td class="p-3">${u.joined}
-            `).join("");
-        } catch (error) {
+            if (usersList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No users registered yet</td></tr>';
+            } else {
+                tbody.innerHTML = usersList.map(u => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${u.email}</td>
+                        <td class="p-3">${u.fullName}</td>
+                        <td class="p-3">${u.farmName}</td>
+                        <td class="p-3"><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span></td>
+                        <td class="p-3">${u.joined}</td>
+                        <td class="p-3">${u.records} records</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (error) { 
             console.error("Admin panel error:", error);
-            showToast("Error loading admin data", true);
+            document.getElementById("adminUsersTableBody").innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error loading users</td></tr>';
         }
     }
 
-    // Set today's date
     const today = new Date().toISOString().split('T')[0];
     document.getElementById("dailyDate").value = today;
     document.getElementById("saleDate").value = today;
@@ -456,45 +848,68 @@
         const date = document.getElementById("dailyDate").value;
         const birds = parseInt(document.getElementById("activeBirds").value);
         const eggs = parseInt(document.getElementById("eggsCollected").value);
-        if (!date || isNaN(birds) || isNaN(eggs)) { showToast("Fill all required fields", true); return; }
-        await addDoc(getUserDailyCol(), { date, activeBirds: birds, eggsCollected: eggs, damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, feedKg: parseFloat(document.getElementById("feedKg").value) || 0, mortality: parseInt(document.getElementById("mortalityCount").value) || 0, timestamp: new Date().toISOString() });
-        showToast("Record saved!");
-        document.getElementById("activeBirds").value = "";
-        document.getElementById("eggsCollected").value = "";
+        if (!date) { showToast("Select date", true); return; }
+        if (isNaN(birds) || birds <= 0) { showToast("Enter valid bird count", true); return; }
+        if (isNaN(eggs) || eggs < 0) { showToast("Enter valid egg count", true); return; }
+        
+        const newRef = push(getUserDailyRef());
+        await set(newRef, { date, activeBirds: birds, eggsCollected: eggs, damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, feedKg: parseFloat(document.getElementById("feedKg").value) || 0, mortality: parseInt(document.getElementById("mortalityCount").value) || 0, timestamp: new Date().toISOString() });
+        
+        const layingRate = ((eggs / birds) * 100).toFixed(1);
+        showSuccessModalWithRedirect(`Daily record saved! ${eggs} eggs from ${birds} birds. Laying rate: ${layingRate}%`, true);
+        resetDailyForm();
     });
     
     document.getElementById("addSaleBtn")?.addEventListener("click", async () => {
         const qty = parseFloat(document.getElementById("saleQuantity").value);
         const price = parseFloat(document.getElementById("saleUnitPrice").value);
-        if (isNaN(qty) || isNaN(price)) { showToast("Enter quantity and price", true); return; }
-        await addDoc(getUserSalesCol(), { date: document.getElementById("saleDate").value, itemType: document.getElementById("saleItemType").value, quantity: qty, unitPrice: price, total: qty * price, customer: document.getElementById("customerProfile").value, paymentStatus: document.getElementById("paymentStatus").value, timestamp: new Date().toISOString() });
-        showToast("Sale recorded!");
-        document.getElementById("saleQuantity").value = "";
-        document.getElementById("saleUnitPrice").value = "";
+        if (isNaN(qty) || qty <= 0) { showToast("Enter valid quantity", true); return; }
+        if (isNaN(price) || price <= 0) { showToast("Enter valid price", true); return; }
+        const total = qty * price;
+        
+        const newRef = push(getUserSalesRef());
+        await set(newRef, { date: document.getElementById("saleDate").value, itemType: document.getElementById("saleItemType").value, quantity: qty, unitPrice: price, total: total, customer: document.getElementById("customerProfile").value || "Walk-in", paymentStatus: document.getElementById("paymentStatus").value, timestamp: new Date().toISOString() });
+        
+        showSuccessModalWithRedirect(`Sale recorded! ${qty} ${document.getElementById("saleItemType").value} sold for KES ${total.toLocaleString()}.`, true);
+        resetSalesForm();
     });
     
     document.getElementById("addExpenseBtn")?.addEventListener("click", async () => {
         const cost = parseFloat(document.getElementById("expenseTotalCost").value);
-        if (isNaN(cost)) { showToast("Enter expense amount", true); return; }
-        await addDoc(getUserExpensesCol(), { date: document.getElementById("expenseDate").value, category: document.getElementById("expenseCategory").value, description: document.getElementById("expenseDesc").value, quantity: parseFloat(document.getElementById("expenseQty").value) || 1, totalCost: cost, timestamp: new Date().toISOString() });
-        showToast("Expense added!");
-        document.getElementById("expenseTotalCost").value = "";
-        document.getElementById("expenseDesc").value = "";
+        if (isNaN(cost) || cost <= 0) { showToast("Enter valid expense amount", true); return; }
+        
+        const newRef = push(getUserExpensesRef());
+        await set(newRef, { date: document.getElementById("expenseDate").value, category: document.getElementById("expenseCategory").value, description: document.getElementById("expenseDesc").value || "No description", quantity: parseFloat(document.getElementById("expenseQty").value) || 1, totalCost: cost, timestamp: new Date().toISOString() });
+        
+        showSuccessModalWithRedirect(`Expense recorded! KES ${cost.toLocaleString()} spent on ${document.getElementById("expenseCategory").value}.`, true);
+        resetExpensesForm();
     });
     
     document.getElementById("updateFlockBtn")?.addEventListener("click", async () => {
-        await setDoc(getUserFlockDoc(), { flockName: document.getElementById("flockName").value, birdType: document.getElementById("birdType").value });
-        showToast("Settings saved!");
+        const flockName = document.getElementById("flockName").value;
+        const birdType = document.getElementById("birdType").value;
+        const totalBirds = parseInt(document.getElementById("totalBirds").value) || 0;
+        const housingType = document.getElementById("housingType").value;
+        
+        if (!flockName) { showToast("Please enter flock name", true); return; }
+        if (totalBirds <= 0) { showToast("Please enter valid total birds count", true); return; }
+        
+        await set(getUserFlockRef(), { flockName: flockName, birdType: birdType, totalBirds: totalBirds, housingType: housingType, updatedAt: new Date().toISOString() });
+        
+        showSuccessModalWithRedirect(`Flock settings saved! ${flockName} configured with ${totalBirds} ${birdType}.`, true);
+        resetFlockForm();
     });
     
     document.getElementById("exportReportBtn")?.addEventListener("click", () => {
         const data = { daily: currentDaily, sales: currentSales, expenses: currentExpenses, exportedAt: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(data, null,2)], {type:"application/json"});
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; a.click();
-        showToast("Report exported!");
+        showSuccessModalWithRedirect("Report exported successfully! Your data has been saved as a JSON file.", true);
     });
     
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); });
+    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); showToast("Logged out successfully"); });
+    
+    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { loadAdminPanel(); showToast("Admin data refreshed"); });
 
     // Tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -511,37 +926,40 @@
     
     document.getElementById("dashboardMonth")?.addEventListener("change", () => refreshDashboard());
 
-    function isValidEmail(email) {
-        return typeof email === 'string' && /\S+@\S+\.\S+/.test(email);
-    }
-
     // Auth handlers
     document.getElementById("loginBtn")?.addEventListener("click", async () => {
-        const email = document.getElementById("loginEmail").value.trim();
+        const email = document.getElementById("loginEmail").value;
         const password = document.getElementById("loginPassword").value;
-        if (!email || !password) { showToast("Enter your email and password", true); return; }
-        if (!isValidEmail(email)) { showToast("Enter a valid email address", true); return; }
+        const rememberMe = document.getElementById("rememberMe").checked;
+        if (!email || !password) { showToast("Enter email and password", true); return; }
         try {
+            if (rememberMe) { await setPersistence(auth, browserLocalPersistence); } 
+            else { await setPersistence(auth, browserSessionPersistence); }
             await signInWithEmailAndPassword(auth, email, password);
             showToast("Login successful!");
         } catch(e) { showToast(e.message, true); }
     });
     
     document.getElementById("registerBtn")?.addEventListener("click", async () => {
-        const name = document.getElementById("regName").value.trim();
-        const email = document.getElementById("regEmail").value.trim();
+        const name = document.getElementById("regName").value;
+        const email = document.getElementById("regEmail").value;
         const password = document.getElementById("regPassword").value;
         const confirm = document.getElementById("regConfirmPassword").value;
-        const farmName = document.getElementById("regFarmName").value.trim();
-        if (!name || !email || !password || !confirm || !farmName) { showToast("Fill all fields", true); return; }
-        if (!isValidEmail(email)) { showToast("Enter a valid email address", true); return; }
+        const farmName = document.getElementById("regFarmName").value;
+        if (!name || !email || !password || !farmName) { showToast("Fill all fields", true); return; }
         if (password !== confirm) { showToast("Passwords don't match", true); return; }
         if (password.length < 6) { showToast("Password min 6 chars", true); return; }
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(cred.user, { displayName: name });
-            await setDoc(doc(db, "users", cred.user.uid), { email: email, displayName: name, farmName: farmName, createdAt: new Date().toISOString() });
-            showToast("Account created!");
+            await set(ref(db, `users/${cred.user.uid}`), { 
+                email: email, 
+                displayName: name,
+                fullName: name,
+                farmName: farmName, 
+                createdAt: new Date().toISOString() 
+            });
+            showSuccessModalWithRedirect(`Welcome ${name}! Your account has been created successfully for ${farmName}.`, true);
         } catch(e) { showToast(e.message, true); }
     });
     
@@ -559,8 +977,7 @@
         if (user) {
             currentUser = user;
             currentUserRole = ADMIN_EMAILS.includes(user.email) ? "admin" : "user";
-            
-            document.getElementById("userEmailDisplay").innerHTML = `<i class="fas fa-user-circle mr-1"></i> ${user.email}`;
+            document.getElementById("userEmailDisplay").innerHTML = `${user.email}`;
             const roleBadge = document.getElementById("roleBadge");
             if (currentUserRole === "admin") {
                 roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
@@ -571,15 +988,11 @@
                 roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
                 document.getElementById("adminTabBtn").classList.add("hidden");
             }
-            
             document.getElementById("authModal").classList.add("hidden");
             document.getElementById("mainApp").classList.remove("hidden");
-            startListeners();
+            startRealtimeListeners();
             await loadFlockSettings();
         } else {
-            if (dailyUnsubscribe) dailyUnsubscribe();
-            if (salesUnsubscribe) salesUnsubscribe();
-            if (expensesUnsubscribe) expensesUnsubscribe();
             document.getElementById("authModal").classList.remove("hidden");
             document.getElementById("mainApp").classList.add("hidden");
         }
