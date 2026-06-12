@@ -516,11 +516,158 @@
     const today = new Date().toISOString().split('T')[0];
     ["dailyDate","eggSaleDate","chickenSaleDate","expenseDate"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today; });
 
-    document.getElementById("addDailyEntry")?.addEventListener("click",async()=>{ const date=document.getElementById("dailyDate").value, birds=parseInt(document.getElementById("activeBirds").value), eggs=parseInt(document.getElementById("eggsCollected").value); if(!date||isNaN(birds)||birds<=0||isNaN(eggs)||eggs<0){ showToast("Fill required fields",true); return; } await push(getRefs().daily,{date,activeBirds:birds,eggsCollected:eggs,damagedEggs:parseInt(document.getElementById("damagedEggs").value)||0,feedKg:parseFloat(document.getElementById("feedKg").value)||0,mortality:parseInt(document.getElementById("mortalityCount").value)||0,timestamp:Date.now()}); showToast("Record saved!"); });
-    document.getElementById("addEggSaleBtn")?.addEventListener("click",async()=>{ const qty=parseFloat(document.getElementById("eggSaleQuantity").value), price=parseFloat(document.getElementById("eggSaleUnitPrice").value); if(isNaN(qty)||qty<=0||isNaN(price)||price<=0){ showToast("Enter valid quantity/price",true); return; } await push(getRefs().eggSales,{date:document.getElementById("eggSaleDate").value,saleType:document.getElementById("eggSaleType").value,quantity:qty,unitPrice:price,total:qty*price,customer:document.getElementById("eggSaleCustomer").value||"Walk-in",paymentStatus:document.getElementById("eggSalePaymentStatus").value,timestamp:Date.now()}); showToast("Sale recorded!"); });
-    document.getElementById("addChickenSaleBtn")?.addEventListener("click",async()=>{ const qty=parseFloat(document.getElementById("chickenQuantity").value), price=parseFloat(document.getElementById("chickenUnitPrice").value); if(isNaN(qty)||qty<=0||isNaN(price)||price<=0){ showToast("Enter valid quantity/price",true); return; } await push(getRefs().chickenSales,{date:document.getElementById("chickenSaleDate").value,chickenType:document.getElementById("chickenType").value,quantity:qty,unitPrice:price,weight:parseFloat(document.getElementById("chickenWeight").value)||0,total:qty*price,customer:document.getElementById("chickenCustomer").value||"Walk-in",paymentStatus:document.getElementById("chickenPaymentStatus").value,timestamp:Date.now()}); showToast("Sale recorded!"); });
-    document.getElementById("addExpenseBtn")?.addEventListener("click",async()=>{ const cost=parseFloat(document.getElementById("expenseTotalCost").value); if(isNaN(cost)||cost<=0){ showToast("Enter valid expense",true); return; } await push(getRefs().expenses,{date:document.getElementById("expenseDate").value,category:document.getElementById("expenseCategory").value,description:document.getElementById("expenseDesc").value||"No description",quantity:parseFloat(document.getElementById("expenseQty").value)||1,totalCost:cost,timestamp:Date.now()}); showToast("Expense added!"); });
-    document.getElementById("updateFlockBtn")?.addEventListener("click",async()=>{ const name=document.getElementById("flockName").value.trim(), birds=parseInt(document.getElementById("totalBirds").value)||0; if(!name||birds<=0){ showToast("Enter valid flock name and bird count",true); return; } await set(getRefs().flock,{flockName:name,birdType:document.getElementById("birdType").value,totalBirds:birds,housingType:document.getElementById("housingType").value,updatedAt:Date.now()}); showToast("Settings saved!"); });
+    document.getElementById("addDailyEntry")?.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const dailyDateEl = document.getElementById("dailyDate");
+        const activeBirdsEl = document.getElementById("activeBirds");
+        const eggsCollectedEl = document.getElementById("eggsCollected");
+        const damagedEggsEl = document.getElementById("damagedEggs");
+        const feedKgEl = document.getElementById("feedKg");
+        const mortalityEl = document.getElementById("mortalityCount");
+        if (!dailyDateEl || !activeBirdsEl || !eggsCollectedEl || !damagedEggsEl || !feedKgEl || !mortalityEl) return;
+        const date = dailyDateEl.value;
+        const birds = parseInt(activeBirdsEl.value);
+        const eggs = parseInt(eggsCollectedEl.value);
+        if (!date || isNaN(birds) || birds <= 0 || isNaN(eggs) || eggs < 0) { showToast("Fill required fields", true); return; }
+        await push(getRefs().daily, {
+            date,
+            activeBirds: birds,
+            eggsCollected: eggs,
+            damagedEggs: parseInt(damagedEggsEl.value) || 0,
+            feedKg: parseFloat(feedKgEl.value) || 0,
+            mortality: parseInt(mortalityEl.value) || 0,
+            timestamp: Date.now()
+        });
+        dailyDateEl.value = date;
+        activeBirdsEl.value = String(birds);
+        eggsCollectedEl.value = String(eggs);
+        damagedEggsEl.value = String(parseInt(damagedEggsEl.value) || 0);
+        feedKgEl.value = String(parseFloat(feedKgEl.value) || 0);
+        mortalityEl.value = String(parseInt(mortalityEl.value) || 0);
+        showToast("Record saved!");
+    });
+
+    document.getElementById("addEggSaleBtn")?.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const dateEl = document.getElementById("eggSaleDate");
+        const qtyEl = document.getElementById("eggSaleQuantity");
+        const priceEl = document.getElementById("eggSaleUnitPrice");
+        const customerEl = document.getElementById("eggSaleCustomer");
+        const saleTypeEl = document.getElementById("eggSaleType");
+        const paymentStatusEl = document.getElementById("eggSalePaymentStatus");
+        if (!dateEl || !qtyEl || !priceEl || !customerEl || !saleTypeEl || !paymentStatusEl) return;
+        const date = dateEl.value;
+        const qty = parseFloat(qtyEl.value);
+        const price = parseFloat(priceEl.value);
+        if (isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) { showToast("Enter valid quantity/price", true); return; }
+        await push(getRefs().eggSales, {
+            date,
+            saleType: saleTypeEl.value,
+            quantity: qty,
+            unitPrice: price,
+            total: qty * price,
+            customer: customerEl.value || "Walk-in",
+            paymentStatus: paymentStatusEl.value,
+            timestamp: Date.now()
+        });
+        dateEl.value = date;
+        qtyEl.value = String(qty);
+        priceEl.value = String(price);
+        customerEl.value = customerEl.value;
+        showToast("Sale recorded!");
+    });
+
+    document.getElementById("addChickenSaleBtn")?.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const dateEl = document.getElementById("chickenSaleDate");
+        const qtyEl = document.getElementById("chickenQuantity");
+        const priceEl = document.getElementById("chickenUnitPrice");
+        const weightEl = document.getElementById("chickenWeight");
+        const customerEl = document.getElementById("chickenCustomer");
+        const typeEl = document.getElementById("chickenType");
+        const paymentStatusEl = document.getElementById("chickenPaymentStatus");
+        if (!dateEl || !qtyEl || !priceEl || !weightEl || !customerEl || !typeEl || !paymentStatusEl) return;
+        const date = dateEl.value;
+        const qty = parseFloat(qtyEl.value);
+        const price = parseFloat(priceEl.value);
+        const weight = parseFloat(weightEl.value) || 0;
+        if (isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) { showToast("Enter valid quantity/price", true); return; }
+        await push(getRefs().chickenSales, {
+            date,
+            chickenType: typeEl.value,
+            quantity: qty,
+            unitPrice: price,
+            weight,
+            total: qty * price,
+            customer: customerEl.value || "Walk-in",
+            paymentStatus: paymentStatusEl.value,
+            timestamp: Date.now()
+        });
+        dateEl.value = date;
+        qtyEl.value = String(qty);
+        priceEl.value = String(price);
+        weightEl.value = String(weight);
+        customerEl.value = customerEl.value;
+        showToast("Sale recorded!");
+    });
+
+    document.getElementById("addExpenseBtn")?.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const dateEl = document.getElementById("expenseDate");
+        const categoryEl = document.getElementById("expenseCategory");
+        const descEl = document.getElementById("expenseDesc");
+        const qtyEl = document.getElementById("expenseQty");
+        const costEl = document.getElementById("expenseTotalCost");
+        if (!dateEl || !categoryEl || !descEl || !qtyEl || !costEl) return;
+        const date = dateEl.value;
+        const cost = parseFloat(costEl.value);
+        const quantity = parseFloat(qtyEl.value) || 1;
+        if (isNaN(cost) || cost <= 0) { showToast("Enter valid expense", true); return; }
+        await push(getRefs().expenses, {
+            date,
+            category: categoryEl.value,
+            description: descEl.value || "No description",
+            quantity,
+            totalCost: cost,
+            timestamp: Date.now()
+        });
+        dateEl.value = date;
+        categoryEl.value = categoryEl.value;
+        descEl.value = descEl.value;
+        qtyEl.value = String(quantity);
+        costEl.value = String(cost);
+        showToast("Expense added!");
+    });
+
+    document.getElementById("updateFlockBtn")?.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const nameEl = document.getElementById("flockName");
+        const birdsEl = document.getElementById("totalBirds");
+        const birdTypeEl = document.getElementById("birdType");
+        const housingEl = document.getElementById("housingType");
+        if (!nameEl || !birdsEl || !birdTypeEl || !housingEl) return;
+        const name = nameEl.value.trim();
+        const birds = parseInt(birdsEl.value) || 0;
+        if (!name || birds <= 0) { showToast("Enter valid flock name and bird count", true); return; }
+        await set(getRefs().flock, {
+            flockName: name,
+            birdType: birdTypeEl.value,
+            totalBirds: birds,
+            housingType: housingEl.value,
+            updatedAt: Date.now()
+        });
+        nameEl.value = name;
+        birdsEl.value = String(birds);
+        birdTypeEl.value = birdTypeEl.value;
+        housingEl.value = housingEl.value;
+        showToast("Settings saved!");
+    });
+
     document.getElementById("exportReportBtn")?.addEventListener("click",()=>{ const data={daily:currentDaily,eggSales:currentEggSales,chickenSales:currentChickenSales,expenses:currentExpenses,exportedAt:new Date().toISOString()}; const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"})); a.download=`poultry_report_${today}.json`; a.click(); showToast("Report exported!"); });
     document.getElementById("logoutBtn")?.addEventListener("click",async()=>{ await signOut(auth); showToast("Logged out"); });
     document.getElementById("refreshAdminBtn")?.addEventListener("click",()=>{ loadAdminPanel(); showToast("Admin data refreshed"); });
