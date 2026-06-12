@@ -141,10 +141,6 @@ public class ChickenSalesActivity extends AppCompatActivity {
                     btnSave.setEnabled(true);
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Sale recorded successfully!", Toast.LENGTH_SHORT).show();
-                        etQuantity.setText("");
-                        etUnitPrice.setText("");
-                        etWeight.setText("");
-                        etCustomer.setText("");
                     } else {
                         Toast.makeText(this, "Error saving sale", Toast.LENGTH_SHORT).show();
                     }

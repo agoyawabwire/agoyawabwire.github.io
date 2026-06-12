@@ -135,9 +135,6 @@ public class ExpensesActivity extends AppCompatActivity {
                     btnSave.setEnabled(true);
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Expense recorded successfully!", Toast.LENGTH_SHORT).show();
-                        etDescription.setText("");
-                        etQuantity.setText("1");
-                        etTotalCost.setText("");
                     } else {
                         Toast.makeText(this, "Error saving expense", Toast.LENGTH_SHORT).show();
                     }

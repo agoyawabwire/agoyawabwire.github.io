@@ -163,10 +163,6 @@ public class DailyProductionActivity extends AppCompatActivity {
                         btnSave.setEnabled(true);
                         if (task.isSuccessful()) {
                             Toast.makeText(this, "Record saved successfully!", Toast.LENGTH_SHORT).show();
-                            etEggsCollected.setText("");
-                            etDamagedEggs.setText("0");
-                            etFeedKg.setText("");
-                            etMortality.setText("0");
                         } else {
                             Toast.makeText(this, "Error saving record", Toast.LENGTH_SHORT).show();
                         }

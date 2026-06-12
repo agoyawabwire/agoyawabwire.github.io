@@ -190,7 +190,7 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Feed Consumed (kg)</label><input type="number" step="0.1" id="feedKg" class="w-full border rounded-lg p-2" placeholder="Feed in kg" min="0"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Mortality</label><input type="number" id="mortalityCount" class="w-full border rounded-lg p-2" placeholder="Bird deaths" value="0" min="0"></div>
             </div>
-            <button id="addDailyEntry" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-save mr-2"></i> Save Record</button>
+            <button type="button" id="addDailyEntry" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-save mr-2"></i> Save Record</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
             <table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th class="p-3">Date</th><th>Active Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed(kg)</th><th>Mortality</th><th>Action</th></tr></thead><tbody id="dailyTableBody"></tbody></table>
@@ -209,7 +209,7 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer</label><input type="text" id="eggSaleCustomer" class="w-full border rounded-lg p-2" placeholder="Customer name"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label><select id="eggSalePaymentStatus" class="w-full border rounded-lg p-2"><option>Paid</option><option>Credit/Pending</option></select></div>
             </div>
-            <button id="addEggSaleBtn" class="btn-success mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Egg Sale</button>
+            <button type="button" id="addEggSaleBtn" class="btn-success mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Egg Sale</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Sale Type</th><th>Quantity</th><th>Unit Price</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead><tbody id="eggSalesTableBody"></tbody></table></div>
     </div>
@@ -227,7 +227,7 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer</label><input type="text" id="chickenCustomer" class="w-full border rounded-lg p-2" placeholder="Customer name"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label><select id="chickenPaymentStatus" class="w-full border rounded-lg p-2"><option>Paid</option><option>Credit/Pending</option></select></div>
             </div>
-            <button id="addChickenSaleBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Chicken Sale</button>
+            <button type="button" id="addChickenSaleBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Chicken Sale</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Chicken Type</th><th># Birds</th><th>Price/Bird</th><th>Weight(kg)</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead><tbody id="chickenSalesTableBody"></tbody></table></div>
     </div>
@@ -243,7 +243,7 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label><input type="number" id="expenseQty" class="w-full border rounded-lg p-2" placeholder="Quantity" value="1" min="1"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Cost (KES)</label><input type="number" id="expenseTotalCost" class="w-full border rounded-lg p-2" placeholder="Total cost" min="1"></div>
             </div>
-            <button id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
+            <button type="button" id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Category</th><th>Description</th><th>Quantity</th><th>Total Cost (KES)</th><th>Action</th></tr></thead><tbody id="expensesTableBody"></tbody></table></div>
     </div>
@@ -257,7 +257,7 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Bird Type</label><select id="birdType" class="w-full border rounded-lg p-2"><option>Layers (Egg Production)</option><option>Broilers (Meat Production)</option><option>Dual Purpose</option></select></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Total Birds</label><input type="number" id="totalBirds" class="w-full border rounded-lg p-2" placeholder="Total birds in flock" min="1"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Housing Type</label><select id="housingType" class="w-full border rounded-lg p-2"><option>Free Range</option><option>Barn</option><option>Cage System</option><option>Pasture Raised</option></select></div>
-                <button id="updateFlockBtn" class="btn-primary w-full py-3"><i class="fas fa-save mr-2"></i> Save Settings</button>
+                <button type="button" id="updateFlockBtn" class="btn-primary w-full py-3"><i class="fas fa-save mr-2"></i> Save Settings</button>
             </div>
         </div>
     </div>
