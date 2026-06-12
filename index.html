@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>PoultryFlow Pro | Complete Farm Management</title>
-    <!-- Firebase SDKs for Realtime Database -->
     <script type="importmap">
         {
             "imports": {
@@ -20,134 +19,34 @@
     <style>
         * { transition: all 0.2s ease; }
         body { background: linear-gradient(135deg, #f0f4f0 0%, #e8ece8 100%); min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
-        input, select, textarea {
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            background: white;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-        }
+        input, select, textarea { border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; background: white; }
+        input:focus, select:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; }
         .btn-primary:hover { background: linear-gradient(135deg, #166534 0%, #14532d 100%); transform: scale(1.02); }
-        .btn-success {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-        }
-        .tab-active {
-            border-bottom: 3px solid #15803d;
-            color: #15803d;
-            font-weight: 600;
-        }
-        .toast-message {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1f2937;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            z-index: 1000;
-            font-size: 0.875rem;
-            animation: slideIn 0.3s ease;
-            max-width: 90%;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        .btn-success { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; }
+        .btn-warning { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; }
+        .tab-active { border-bottom: 3px solid #15803d; color: #15803d; font-weight: 600; }
+        .toast-message { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: white; padding: 12px 20px; border-radius: 50px; z-index: 1000; font-size: 0.875rem; animation: slideIn 0.3s ease; max-width: 90%; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .hidden { display: none !important; }
         .admin-badge { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
         .user-badge { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; }
         .role-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
         .role-admin { background: #ede9fe; color: #6d28d9; }
         .role-user { background: #d1fae5; color: #065f46; }
-        
-        .success-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .success-modal {
-            background: white;
-            max-width: 400px;
-            width: 90%;
-            border-radius: 2rem;
-            padding: 2rem;
-            text-align: center;
-            animation: scaleIn 0.3s ease;
-        }
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            animation: bounceIn 0.5s ease;
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        .success-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; }
+        .success-modal { background: white; max-width: 400px; width: 90%; border-radius: 2rem; padding: 2rem; text-align: center; animation: scaleIn 0.3s ease; }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #15803d 0%, #166534 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: bounceIn 0.5s ease; }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .success-icon i { font-size: 3rem; color: white; }
-        
         .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; }
         th { background-color: #f9fafb; font-weight: 600; color: #374151; padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
         td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
         tr:hover { background-color: #f9fafb; }
-        .refresh-btn {
-            background: #f3f4f6;
-            color: #374151;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            margin-left: 10px;
-            border: none;
-        }
+        .refresh-btn { background: #f3f4f6; color: #374151; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-left: 10px; border: none; }
         .refresh-btn:hover { background: #e5e7eb; }
         .approve-btn { background: #059669; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; margin-right: 5px; border: none; }
         .approve-btn:hover { background: #047857; }
@@ -155,6 +54,11 @@
         .reject-btn:hover { background: #b91c1c; }
         .suspend-btn { background: #d97706; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; border: none; }
         .suspend-btn:hover { background: #b45309; }
+        .view-data-btn { background: #3b82f6; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; border: none; }
+        .view-data-btn:hover { background: #2563eb; }
+        .admin-sub-tab { padding: 8px 16px; cursor: pointer; border-radius: 8px; transition: all 0.2s; display: inline-block; }
+        .admin-sub-tab:hover { background: #f3f4f6; }
+        .admin-sub-tab.active { background: #15803d; color: white; }
     </style>
 </head>
 <body>
@@ -274,7 +178,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5"><canvas id="eggTrendChart" height="80" style="max-height: 300px; width:100%"></canvas></div>
     </div>
 
-    <!-- DAILY PRODUCTION TABLE -->
+    <!-- DAILY PRODUCTION -->
     <div id="daily-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Add Daily Record</h2>
@@ -289,21 +193,11 @@
             <button id="addDailyEntry" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-save mr-2"></i> Save Record</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3">Date</th><th class="p-3">Active Birds</th><th class="p-3">Eggs</th><th class="p-3">Damaged</th>
-                        <th class="p-3">Good Eggs</th><th class="p-3">Laying Rate</th><th class="p-3">Feed(kg)</th><th class="p-3">Mortality</th><th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="dailyTableBody">
-                    <tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>
-                </tbody>
-            </table>
+            <table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th class="p-3">Date</th><th>Active Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed(kg)</th><th>Mortality</th><th>Action</th></tr></thead><tbody id="dailyTableBody"></tbody></table>
         </div>
     </div>
 
-    <!-- EGG SALES TABLE -->
+    <!-- EGG SALES -->
     <div id="eggsales-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Record Egg Sale</h2>
@@ -317,22 +211,10 @@
             </div>
             <button id="addEggSaleBtn" class="btn-success mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Egg Sale</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3">Date</th><th class="p-3">Sale Type</th><th class="p-3">Quantity</th>
-                        <th class="p-3">Unit Price</th><th class="p-3">Total (KES)</th><th class="p-3">Customer</th><th class="p-3">Status</th><th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="eggSalesTableBody">
-                    <tr><td colspan="8" class="text-center p-8 text-gray-400">No egg sales yet</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Sale Type</th><th>Quantity</th><th>Unit Price</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead><tbody id="eggSalesTableBody"></tbody></table></div>
     </div>
 
-    <!-- CHICKEN SALES TABLE -->
+    <!-- CHICKEN SALES -->
     <div id="chickensales-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-orange-600 mr-2"></i>Record Chicken Sale</h2>
@@ -347,22 +229,10 @@
             </div>
             <button id="addChickenSaleBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Record Chicken Sale</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3">Date</th><th class="p-3">Chicken Type</th><th class="p-3"># Birds</th>
-                        <th class="p-3">Price/Bird</th><th class="p-3">Weight(kg)</th><th class="p-3">Total (KES)</th><th class="p-3">Customer</th><th class="p-3">Status</th><th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="chickenSalesTableBody">
-                    <tr><td colspan="9" class="text-center p-8 text-gray-400">No chicken sales yet</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Chicken Type</th><th># Birds</th><th>Price/Bird</th><th>Weight(kg)</th><th>Total (KES)</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead><tbody id="chickenSalesTableBody"></tbody></table></div>
     </div>
 
-    <!-- EXPENSES TABLE -->
+    <!-- EXPENSES -->
     <div id="expenses-section" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 class="text-xl font-semibold mb-5"><i class="fas fa-plus-circle text-green-600 mr-2"></i>Record Expense</h2>
@@ -375,19 +245,7 @@
             </div>
             <button id="addExpenseBtn" class="btn-primary mt-5 px-6 py-2"><i class="fas fa-plus mr-2"></i> Add Expense</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="p-3">Date</th><th class="p-3">Category</th><th class="p-3">Description</th>
-                        <th class="p-3">Quantity</th><th class="p-3">Total Cost (KES)</th><th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="expensesTableBody">
-                    <tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b"><th>Date</th><th>Category</th><th>Description</th><th>Quantity</th><th>Total Cost (KES)</th><th>Action</th></tr></thead><tbody id="expensesTableBody"></tbody></table></div>
     </div>
 
     <!-- FLOCK SETTINGS -->
@@ -419,22 +277,58 @@
                 <div class="bg-blue-50 rounded-xl p-4 text-center"><i class="fas fa-database text-blue-600 text-2xl mb-1"></i><h3 class="text-2xl font-bold" id="totalRecords">0</h3><p class="text-gray-600 text-sm">Total Records</p></div>
             </div>
             
+            <!-- Pending Approvals Section -->
             <div class="mb-8">
-                <h3 class="text-xl font-semibold mb-4"><i class="fas fa-clock text-orange-500 mr-2"></i>Pending User Approvals</h3>
+                <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-clock text-orange-500"></i> Pending User Approvals</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead><tr class="bg-gray-50 border-b"><th class="p-3">Email</th><th class="p-3">Full Name</th><th class="p-3">Farm Name</th><th class="p-3">Registered On</th><th class="p-3">Actions</th></tr></thead>
-                        <tbody id="pendingUsersTableBody"></tbody>
+                        <thead><tr class="bg-gray-50 border-b"><th class="p-3">Email</th><th>Full Name</th><th>Farm Name</th><th>Registered On</th><th>Actions</th></tr></thead>
+                        <tbody id="pendingUsersTableBody"><tr><td colspan="5" class="text-center p-8 text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
             
-            <h3 class="text-xl font-semibold mb-4"><i class="fas fa-check-circle text-green-500 mr-2"></i>Approved Users</h3>
+            <!-- Approved Users Section -->
+            <h3 class="text-xl font-semibold mb-4"><i class="fas fa-check-circle text-green-500"></i> Approved Users</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead><tr class="bg-gray-50 border-b"><th class="p-3">Email</th><th class="p-3">Full Name</th><th class="p-3">Farm Name</th><th class="p-3">Role</th><th class="p-3">Joined</th><th class="p-3">Actions</th></tr></thead>
-                    <tbody id="approvedUsersTableBody"></tbody>
+                    <thead><tr class="bg-gray-50 border-b"><th class="p-3">Email</th><th>Full Name</th><th>Farm Name</th><th>Role</th><th>Joined</th><th>Records</th><th>Actions</th></tr></thead>
+                    <tbody id="approvedUsersTableBody"><tr><td colspan="7" class="text-center p-8 text-gray-400">Loading...</td></tr></tbody>
                 </table>
+            </div>
+            
+            <!-- View User Data Section -->
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h3 class="text-lg font-semibold mb-3"><i class="fas fa-eye mr-2"></i>View User Data</h3>
+                <div class="flex flex-wrap gap-4 items-end">
+                    <div class="flex-1 min-w-[200px]"><label class="block text-sm font-medium text-gray-700 mb-1">Select User</label><select id="adminUserSelector" class="w-full border rounded-lg p-2"><option value="">-- Select a user --</option></select></div>
+                    <button id="loadUserDataBtn" class="btn-primary px-4 py-2"><i class="fas fa-chart-line mr-2"></i>Load User Data</button>
+                </div>
+            </div>
+            
+            <div id="selectedUserData" class="hidden mt-4">
+                <div class="bg-blue-50 rounded-lg p-4 mb-4"><h3 class="font-semibold text-lg mb-2"><i class="fas fa-user mr-2"></i>User Details</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div><span class="font-medium">Email:</span> <span id="viewUserEmail">-</span></div>
+                        <div><span class="font-medium">Farm Name:</span> <span id="viewUserFarm">-</span></div>
+                        <div><span class="font-medium">Joined:</span> <span id="viewUserJoined">-</span></div>
+                        <div><span class="font-medium">Total Records:</span> <span id="viewUserTotalRecords">0</span></div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mb-4 border-b pb-2 flex-wrap">
+                    <button class="admin-sub-tab active" data-user-tab="dashboard">📊 Dashboard</button>
+                    <button class="admin-sub-tab" data-user-tab="daily">🐔 Daily</button>
+                    <button class="admin-sub-tab" data-user-tab="eggsales">🥚 Egg Sales</button>
+                    <button class="admin-sub-tab" data-user-tab="chickensales">🐓 Chicken Sales</button>
+                    <button class="admin-sub-tab" data-user-tab="expenses">📉 Expenses</button>
+                    <button class="admin-sub-tab" data-user-tab="flock">⚙️ Flock</button>
+                </div>
+                <div id="userDashboardView"><div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"><div class="bg-white rounded-lg p-4 border-l-4 border-green-500"><div class="text-gray-500 text-sm">Total Eggs</div><div class="text-2xl font-bold" id="userTotalEggs">0</div></div><div class="bg-white rounded-lg p-4 border-l-4 border-blue-500"><div class="text-gray-500 text-sm">Feed Used</div><div class="text-2xl font-bold" id="userFeedUsed">0</div></div><div class="bg-white rounded-lg p-4 border-l-4 border-yellow-500"><div class="text-gray-500 text-sm">Laying Rate</div><div class="text-2xl font-bold" id="userLayingRate">0%</div></div><div class="bg-white rounded-lg p-4 border-l-4 border-red-500"><div class="text-gray-500 text-sm">Mortality</div><div class="text-2xl font-bold" id="userMortality">0</div></div><div class="bg-white rounded-lg p-4 border-l-4 border-teal-500"><div class="text-gray-500 text-sm">Egg Revenue</div><div class="text-2xl font-bold" id="userEggRevenue">KES 0</div></div><div class="bg-white rounded-lg p-4 border-l-4 border-indigo-500"><div class="text-gray-500 text-sm">Chicken Revenue</div><div class="text-2xl font-bold" id="userChickenRevenue">KES 0</div></div></div></div>
+                <div id="userDailyView" class="hidden overflow-x-auto"><h4 class="font-semibold mb-2">Daily Production</h4><table class="min-w-full text-sm"><thead><tr class="bg-gray-50"><th>Date</th><th>Birds</th><th>Eggs</th><th>Damaged</th><th>Good Eggs</th><th>Laying Rate</th><th>Feed</th><th>Mortality</th></tr></thead><tbody id="userDailyTableBody"></tbody></table></div>
+                <div id="userEggSalesView" class="hidden overflow-x-auto"><h4 class="font-semibold mb-2">Egg Sales</h4><table class="min-w-full text-sm"><thead><tr class="bg-gray-50"><th>Date</th><th>Sale Type</th><th>Quantity</th><th>Unit Price</th><th>Total</th><th>Customer</th><th>Status</th></tr></thead><tbody id="userEggSalesTableBody"></tbody></table></div>
+                <div id="userChickenSalesView" class="hidden overflow-x-auto"><h4 class="font-semibold mb-2">Chicken Sales</h4><table class="min-w-full text-sm"><thead><tr class="bg-gray-50"><th>Date</th><th>Type</th><th># Birds</th><th>Price/Bird</th><th>Weight</th><th>Total</th><th>Customer</th><th>Status</th></tr></thead><tbody id="userChickenSalesTableBody"></tbody></table></div>
+                <div id="userExpensesView" class="hidden overflow-x-auto"><h4 class="font-semibold mb-2">Expenses</h4><table class="min-w-full text-sm"><thead><tr class="bg-gray-50"><th>Date</th><th>Category</th><th>Description</th><th>Quantity</th><th>Total Cost</th></tr></thead><tbody id="userExpensesTableBody"></tbody></table></div>
+                <div id="userFlockView" class="hidden"><h4 class="font-semibold mb-2">Flock Settings</h4><div class="bg-gray-50 rounded-lg p-4"><div class="grid grid-cols-2 gap-4"><div><span class="font-medium">Flock Name:</span> <span id="userFlockName">-</span></div><div><span class="font-medium">Bird Type:</span> <span id="userBirdType">-</span></div><div><span class="font-medium">Total Birds:</span> <span id="userTotalBirds">-</span></div><div><span class="font-medium">Housing:</span> <span id="userHousingType">-</span></div></div></div></div>
             </div>
         </div>
     </div>
@@ -459,12 +353,7 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    let currentUser = null;
-    let currentUserRole = "user";
-    let currentDaily = [], currentEggSales = [], currentChickenSales = [], currentExpenses = [];
-    let currentChart = null;
-    let redirectTimer = null;
-
+    let currentUser = null, currentUserRole = "user", currentDaily = [], currentEggSales = [], currentChickenSales = [], currentExpenses = [], currentChart = null;
     const ADMIN_EMAILS = ["admin@poultryflow.com", "bit003623@student.kibu.ac.ke"];
 
     function showToast(msg, isError = false) {
@@ -475,504 +364,177 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    function showSuccessModal(message) {
-        const modal = document.getElementById("successModal");
-        if (!modal) return;
-        document.getElementById("successMessage").textContent = message;
-        modal.classList.remove("hidden");
-        document.getElementById("closeSuccessModal").onclick = () => {
-            modal.classList.add("hidden");
+    function getRefs() {
+        return {
+            daily: ref(db, `users/${currentUser.uid}/dailyProduction`),
+            eggSales: ref(db, `users/${currentUser.uid}/eggSales`),
+            chickenSales: ref(db, `users/${currentUser.uid}/chickenSales`),
+            expenses: ref(db, `users/${currentUser.uid}/expensesLog`),
+            flock: ref(db, `users/${currentUser.uid}/config/flockSettings`)
         };
-        setTimeout(() => modal.classList.add("hidden"), 3000);
     }
 
-    function getUserDailyRef() { return ref(db, `users/${currentUser.uid}/dailyProduction`); }
-    function getUserEggSalesRef() { return ref(db, `users/${currentUser.uid}/eggSales`); }
-    function getUserChickenSalesRef() { return ref(db, `users/${currentUser.uid}/chickenSales`); }
-    function getUserExpensesRef() { return ref(db, `users/${currentUser.uid}/expensesLog`); }
-    function getUserFlockRef() { return ref(db, `users/${currentUser.uid}/config/flockSettings`); }
-
-    function renderDailyTable() {
-        const tbody = document.getElementById("dailyTableBody");
+    function renderTable(tbodyId, data, type) {
+        const tbody = document.getElementById(tbodyId);
         if (!tbody) return;
-        if (currentDaily.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No records yet</td></tr>';
-            return;
+        if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-gray-400">No records yet</td></tr>`; return; }
+        const sorted = [...data].sort((a,b) => new Date(b.date) - new Date(a.date));
+        if (type === 'daily') {
+            tbody.innerHTML = sorted.map(entry => { const good = (entry.eggsCollected||0) - (entry.damagedEggs||0); const rate = entry.activeBirds ? ((entry.eggsCollected/entry.activeBirds)*100).toFixed(1) : 0;
+                return `<tr class="border-b"><td class="p-3">${entry.date}</td><td>${entry.activeBirds}</td><td>${entry.eggsCollected}</td><td class="text-red-600">${entry.damagedEggs||0}</td><td class="text-green-600">${good}</td><td>${rate}%</td><td>${entry.feedKg||0}</td><td class="text-red-600">${entry.mortality||0}</td><td><button class="delete-item text-red-500" data-id="${entry.id}" data-type="daily"><i class="fas fa-trash-alt"></i></button></td></tr>`;
+            }).join('');
+        } else if (type === 'egg') {
+            tbody.innerHTML = sorted.map(s => `<tr class="border-b"><td class="p-3">${s.date}</td><td>${s.saleType}</td><td>${s.quantity}</td><td>KES ${s.unitPrice}</td><td class="text-green-600">KES ${s.total}</td><td>${s.customer||'-'}</td><td><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td><td><button class="delete-item text-red-500" data-id="${s.id}" data-type="egg"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+        } else if (type === 'chicken') {
+            tbody.innerHTML = sorted.map(s => `<tr class="border-b"><td class="p-3">${s.date}</td><td>${s.chickenType}</td><td>${s.quantity}</td><td>KES ${s.unitPrice}</td><td>${s.weight||0}</td><td class="text-green-600">KES ${s.total}</td><td>${s.customer||'-'}</td><td><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td><td><button class="delete-item text-red-500" data-id="${s.id}" data-type="chicken"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+        } else if (type === 'expense') {
+            tbody.innerHTML = sorted.map(e => `<tr class="border-b"><td class="p-3">${e.date}</td><td>${e.category}</td><td>${e.description||'-'}</td><td>${e.quantity}</td><td class="text-red-600">KES ${e.totalCost}</td><td><button class="delete-item text-red-500" data-id="${e.id}" data-type="expense"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
         }
-        const sorted = [...currentDaily].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(entry => {
-            const goodEggs = (entry.eggsCollected || 0) - (entry.damagedEggs || 0);
-            const layingRate = entry.activeBirds && entry.activeBirds > 0 ? ((entry.eggsCollected / entry.activeBirds) * 100).toFixed(1) : 0;
-            return `<tr class="border-b">
-                        <td class="p-3">${entry.date}</td>
-                        <td class="p-3">${entry.activeBirds}</td>
-                        <td class="p-3">${entry.eggsCollected}</td>
-                        <td class="p-3 text-red-600">${entry.damagedEggs||0}</td>
-                        <td class="p-3 text-green-600">${goodEggs}</td>
-                        <td class="p-3">${layingRate}%</td>
-                        <td class="p-3">${entry.feedKg||0}</td>
-                        <td class="p-3 text-red-600">${entry.mortality||0}</td>
-                        <td class="p-3"><button class="delete-daily text-red-500 hover:text-red-700" data-id="${entry.id}"><i class="fas fa-trash-alt"></i></button></td>
-                    </tr>`;
-        }).join('');
-        
-        document.querySelectorAll(".delete-daily").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if(confirm("Delete this record?")) {
-                    await remove(ref(db, `users/${currentUser.uid}/dailyProduction/${btn.dataset.id}`));
-                    showToast("Record deleted");
-                }
-            });
-        });
-    }
-
-    function renderEggSalesTable() {
-        const tbody = document.getElementById("eggSalesTableBody");
-        if (!tbody) return;
-        if (currentEggSales.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-gray-400">No egg sales yet</td></tr>';
-            return;
-        }
-        const sorted = [...currentEggSales].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(s => `<tr class="border-b">
-                    <td class="p-3">${s.date}</td>
-                    <td class="p-3">${s.saleType}</td>
-                    <td class="p-3">${s.quantity}</td>
-                    <td class="p-3">KES ${s.unitPrice}</td>
-                    <td class="p-3 text-green-600">KES ${s.total}</td>
-                    <td class="p-3">${s.customer || '-'}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td>
-                    <td class="p-3"><button class="delete-eggsale text-red-500" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>`).join('');
-        document.querySelectorAll(".delete-eggsale").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this sale?")) { await remove(ref(db, `users/${currentUser.uid}/eggSales/${btn.dataset.id}`)); showToast("Sale deleted"); } }));
-    }
-
-    function renderChickenSalesTable() {
-        const tbody = document.getElementById("chickenSalesTableBody");
-        if (!tbody) return;
-        if (currentChickenSales.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-gray-400">No chicken sales yet</td></tr>';
-            return;
-        }
-        const sorted = [...currentChickenSales].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(s => `<tr class="border-b">
-                    <td class="p-3">${s.date}</td>
-                    <td class="p-3">${s.chickenType}</td>
-                    <td class="p-3">${s.quantity}</td>
-                    <td class="p-3">KES ${s.unitPrice}</td>
-                    <td class="p-3">${s.weight || 0}</td>
-                    <td class="p-3 text-green-600">KES ${s.total}</td>
-                    <td class="p-3">${s.customer || '-'}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${s.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${s.paymentStatus}</span></td>
-                    <td class="p-3"><button class="delete-chickensale text-red-500" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>`).join('');
-        document.querySelectorAll(".delete-chickensale").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this sale?")) { await remove(ref(db, `users/${currentUser.uid}/chickenSales/${btn.dataset.id}`)); showToast("Sale deleted"); } }));
-    }
-
-    function renderExpensesTable() {
-        const tbody = document.getElementById("expensesTableBody");
-        if (!tbody) return;
-        if (currentExpenses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-8 text-gray-400">No expenses yet</td></tr>';
-            return;
-        }
-        const sorted = [...currentExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-        tbody.innerHTML = sorted.map(e => `<tr class="border-b">
-                    <td class="p-3">${e.date}</td>
-                    <td class="p-3">${e.category}</td>
-                    <td class="p-3">${e.description || '-'}</td>
-                    <td class="p-3">${e.quantity}</td>
-                    <td class="p-3 text-red-600">KES ${e.totalCost}</td>
-                    <td class="p-3"><button class="delete-exp text-red-500" data-id="${e.id}"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>`).join('');
-        document.querySelectorAll(".delete-exp").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete this expense?")) { await remove(ref(db, `users/${currentUser.uid}/expensesLog/${btn.dataset.id}`)); showToast("Expense deleted"); } }));
+        document.querySelectorAll(".delete-item").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete?")) { await remove(ref(db, `users/${currentUser.uid}/${btn.dataset.type === 'daily' ? 'dailyProduction' : btn.dataset.type === 'egg' ? 'eggSales' : btn.dataset.type === 'chicken' ? 'chickenSales' : 'expensesLog'}/${btn.dataset.id}`)); showToast("Deleted"); } }));
     }
 
     async function refreshDashboard() {
-        const monthTarget = document.getElementById("dashboardMonth").value;
-        const filteredDaily = currentDaily.filter(d => d.date && d.date.startsWith(monthTarget));
-        const filteredEggSales = currentEggSales.filter(s => s.date && s.date.startsWith(monthTarget));
-        const filteredChickenSales = currentChickenSales.filter(s => s.date && s.date.startsWith(monthTarget));
-        const filteredExpenses = currentExpenses.filter(e => e.date && e.date.startsWith(monthTarget));
-        
-        const totalEggs = filteredDaily.reduce((s,d) => s + (d.eggsCollected || 0), 0);
-        const totalFeed = filteredDaily.reduce((s,d) => s + (d.feedKg || 0), 0);
-        const totalMortality = filteredDaily.reduce((s,d) => s + (d.mortality || 0), 0);
-        let rateSum = 0, rateCount = 0;
-        filteredDaily.forEach(d => { if(d.activeBirds && d.activeBirds > 0) { rateSum += (d.eggsCollected / d.activeBirds) * 100; rateCount++; } });
-        const avgRate = rateCount > 0 ? (rateSum / rateCount).toFixed(1) : 0;
-        const eggRevenue = filteredEggSales.reduce((s,item) => s + (item.total || 0), 0);
-        const chickenRevenue = filteredChickenSales.reduce((s,item) => s + (item.total || 0), 0);
-        const totalRevenue = eggRevenue + chickenRevenue;
-        const totalExpense = filteredExpenses.reduce((s,e) => s + (e.totalCost || 0), 0);
-        const netProfit = totalRevenue - totalExpense;
-        
-        document.getElementById("kpiTotalEggs").innerText = totalEggs;
-        document.getElementById("kpiFeedUsed").innerText = totalFeed.toFixed(1);
+        const month = document.getElementById("dashboardMonth").value;
+        const fd = currentDaily.filter(d => d.date?.startsWith(month));
+        const fe = currentEggSales.filter(s => s.date?.startsWith(month));
+        const fc = currentChickenSales.filter(s => s.date?.startsWith(month));
+        const fx = currentExpenses.filter(e => e.date?.startsWith(month));
+        const eggs = fd.reduce((s,d)=>s+(d.eggsCollected||0),0);
+        const feed = fd.reduce((s,d)=>s+(d.feedKg||0),0);
+        const mort = fd.reduce((s,d)=>s+(d.mortality||0),0);
+        let rateSum=0,rateCnt=0;
+        fd.forEach(d=>{ if(d.activeBirds>0){ rateSum+=(d.eggsCollected/d.activeBirds)*100; rateCnt++; } });
+        const avgRate = rateCnt ? (rateSum/rateCnt).toFixed(1) : 0;
+        const eggRev = fe.reduce((s,i)=>s+(i.total||0),0);
+        const chickenRev = fc.reduce((s,i)=>s+(i.total||0),0);
+        const totalRev = eggRev + chickenRev;
+        const expense = fx.reduce((s,e)=>s+(e.totalCost||0),0);
+        const profit = totalRev - expense;
+        document.getElementById("kpiTotalEggs").innerText = eggs;
+        document.getElementById("kpiFeedUsed").innerText = feed.toFixed(1);
         document.getElementById("kpiLayingRate").innerHTML = `${avgRate}%`;
-        document.getElementById("kpiMortality").innerText = totalMortality;
-        document.getElementById("financeEggRevenue").innerHTML = `KES ${eggRevenue.toLocaleString()}`;
-        document.getElementById("financeChickenRevenue").innerHTML = `KES ${chickenRevenue.toLocaleString()}`;
-        document.getElementById("financeTotalRevenue").innerHTML = `KES ${totalRevenue.toLocaleString()}`;
-        document.getElementById("financeExpenses").innerHTML = `KES ${totalExpense.toLocaleString()}`;
-        const profitEl = document.getElementById("financeProfit");
-        profitEl.innerHTML = `KES ${netProfit.toLocaleString()}`;
-        
-        const last14 = [...filteredDaily].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-14);
+        document.getElementById("kpiMortality").innerText = mort;
+        document.getElementById("financeEggRevenue").innerHTML = `KES ${eggRev.toLocaleString()}`;
+        document.getElementById("financeChickenRevenue").innerHTML = `KES ${chickenRev.toLocaleString()}`;
+        document.getElementById("financeTotalRevenue").innerHTML = `KES ${totalRev.toLocaleString()}`;
+        document.getElementById("financeExpenses").innerHTML = `KES ${expense.toLocaleString()}`;
+        const pEl = document.getElementById("financeProfit");
+        pEl.innerHTML = `KES ${profit.toLocaleString()}`;
+        pEl.className = `text-3xl font-bold ${profit>=0 ? "text-green-600" : "text-red-600"}`;
+        const last14 = [...fd].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-14);
         const ctx = document.getElementById('eggTrendChart')?.getContext('2d');
-        if (ctx) {
-            if (currentChart) currentChart.destroy();
-            currentChart = new Chart(ctx, { type: 'line', data: { labels: last14.map(d=>d.date.slice(5)), datasets: [{ label: 'Eggs Collected', data: last14.map(d=>d.eggsCollected), borderColor: '#15803d', tension: 0.3, fill: false }] } });
-        }
+        if(ctx){ if(currentChart) currentChart.destroy(); currentChart = new Chart(ctx, { type:'line', data:{ labels:last14.map(d=>d.date.slice(5)), datasets:[{ label:'Eggs Collected', data:last14.map(d=>d.eggsCollected), borderColor:'#15803d', tension:0.3, fill:false }] } }); }
     }
 
-    function startRealtimeListeners() {
-        onValue(getUserDailyRef(), (snapshot) => { currentDaily = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderDailyTable(); refreshDashboard(); });
-        onValue(getUserEggSalesRef(), (snapshot) => { currentEggSales = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderEggSalesTable(); refreshDashboard(); });
-        onValue(getUserChickenSalesRef(), (snapshot) => { currentChickenSales = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderChickenSalesTable(); refreshDashboard(); });
-        onValue(getUserExpensesRef(), (snapshot) => { currentExpenses = snapshot.val() ? Object.entries(snapshot.val()).map(([id, value]) => ({ id, ...value })) : []; renderExpensesTable(); refreshDashboard(); });
+    function startListeners() {
+        const refs = getRefs();
+        onValue(refs.daily, (s) => { currentDaily = s.val() ? Object.entries(s.val()).map(([id,v])=>({id,...v})) : []; renderTable("dailyTableBody", currentDaily, 'daily'); refreshDashboard(); });
+        onValue(refs.eggSales, (s) => { currentEggSales = s.val() ? Object.entries(s.val()).map(([id,v])=>({id,...v})) : []; renderTable("eggSalesTableBody", currentEggSales, 'egg'); refreshDashboard(); });
+        onValue(refs.chickenSales, (s) => { currentChickenSales = s.val() ? Object.entries(s.val()).map(([id,v])=>({id,...v})) : []; renderTable("chickenSalesTableBody", currentChickenSales, 'chicken'); refreshDashboard(); });
+        onValue(refs.expenses, (s) => { currentExpenses = s.val() ? Object.entries(s.val()).map(([id,v])=>({id,...v})) : []; renderTable("expensesTableBody", currentExpenses, 'expense'); refreshDashboard(); });
     }
 
-    async function loadFlockSettings() {
-        try { const snapshot = await get(getUserFlockRef()); if (snapshot.exists()) { const data = snapshot.val(); document.getElementById("flockName").value = data.flockName || ""; document.getElementById("birdType").value = data.birdType || "Layers (Egg Production)"; document.getElementById("totalBirds").value = data.totalBirds || ""; document.getElementById("housingType").value = data.housingType || "Free Range"; } } catch(e) { console.error(e); }
+    async function loadFlock() { try { const snap = await get(getRefs().flock); if(snap.exists()){ const d=snap.val(); document.getElementById("flockName").value=d.flockName||""; document.getElementById("birdType").value=d.birdType||"Layers (Egg Production)"; document.getElementById("totalBirds").value=d.totalBirds||""; document.getElementById("housingType").value=d.housingType||"Free Range"; } } catch(e){ console.error(e); } }
+
+    async function loadUserData(uid, email, farm, joined) {
+        document.getElementById("viewUserEmail").innerText = email;
+        document.getElementById("viewUserFarm").innerText = farm;
+        document.getElementById("viewUserJoined").innerText = joined;
+        const daily = (await get(ref(db, `users/${uid}/dailyProduction`))).val() || {};
+        const egg = (await get(ref(db, `users/${uid}/eggSales`))).val() || {};
+        const chicken = (await get(ref(db, `users/${uid}/chickenSales`))).val() || {};
+        const exp = (await get(ref(db, `users/${uid}/expensesLog`))).val() || {};
+        const dailyArr = Object.values(daily), eggArr = Object.values(egg), chickenArr = Object.values(chicken), expArr = Object.values(exp);
+        document.getElementById("userDailyTableBody").innerHTML = dailyArr.map(d=>{ const good=(d.eggsCollected||0)-(d.damagedEggs||0); const rate=d.activeBirds?((d.eggsCollected/d.activeBirds)*100).toFixed(1):0; return `<tr><td class="p-2">${d.date}</td><td>${d.activeBirds}</td><td>${d.eggsCollected}</td><td class="text-red-600">${d.damagedEggs||0}</td><td class="text-green-600">${good}</td><td>${rate}%</td><td>${d.feedKg||0}</td><td class="text-red-600">${d.mortality||0}</td></tr>`; }).join('');
+        document.getElementById("userEggSalesTableBody").innerHTML = eggArr.map(s=>`<tr><td class="p-2">${s.date}</td><td>${s.saleType}</td><td>${s.quantity}</td><td>KES ${s.unitPrice}</td><td class="text-green-600">KES ${s.total}</td><td>${s.customer||'-'}</td><td>${s.paymentStatus}</td></tr>`).join('');
+        document.getElementById("userChickenSalesTableBody").innerHTML = chickenArr.map(s=>`<tr><td class="p-2">${s.date}</td><td>${s.chickenType}</td><td>${s.quantity}</td><td>KES ${s.unitPrice}</td><td>${s.weight||0}</td><td class="text-green-600">KES ${s.total}</td><td>${s.customer||'-'}</td><td>${s.paymentStatus}</td></tr>`).join('');
+        document.getElementById("userExpensesTableBody").innerHTML = expArr.map(e=>`<tr><td class="p-2">${e.date}</td><td>${e.category}</td><td>${e.description||'-'}</td><td>${e.quantity}</td><td class="text-red-600">KES ${e.totalCost}</td></tr>`).join('');
+        const flock = (await get(ref(db, `users/${uid}/config/flockSettings`))).val() || {};
+        document.getElementById("userFlockName").innerText = flock.flockName || "Not set";
+        document.getElementById("userBirdType").innerText = flock.birdType || "Not set";
+        document.getElementById("userTotalBirds").innerText = flock.totalBirds || "0";
+        document.getElementById("userHousingType").innerText = flock.housingType || "Not set";
+        const totalEggs = dailyArr.reduce((s,d)=>s+(d.eggsCollected||0),0);
+        const totalFeed = dailyArr.reduce((s,d)=>s+(d.feedKg||0),0);
+        const totalMort = dailyArr.reduce((s,d)=>s+(d.mortality||0),0);
+        let rSum=0,rCnt=0; dailyArr.forEach(d=>{ if(d.activeBirds>0){ rSum+=(d.eggsCollected/d.activeBirds)*100; rCnt++; } });
+        const aRate = rCnt ? (rSum/rCnt).toFixed(1) : 0;
+        const eRev = eggArr.reduce((s,it)=>s+(it.total||0),0);
+        const cRev = chickenArr.reduce((s,it)=>s+(it.total||0),0);
+        document.getElementById("userTotalEggs").innerText = totalEggs;
+        document.getElementById("userFeedUsed").innerText = totalFeed.toFixed(1);
+        document.getElementById("userLayingRate").innerHTML = `${aRate}%`;
+        document.getElementById("userMortality").innerText = totalMort;
+        document.getElementById("userEggRevenue").innerHTML = `KES ${eRev.toLocaleString()}`;
+        document.getElementById("userChickenRevenue").innerHTML = `KES ${cRev.toLocaleString()}`;
+        document.getElementById("viewUserTotalRecords").innerText = dailyArr.length + eggArr.length + chickenArr.length + expArr.length;
+        document.getElementById("selectedUserData").classList.remove("hidden");
     }
 
     async function loadAdminPanel() {
-        if (currentUserRole !== "admin") return;
+        if(currentUserRole !== "admin") return;
         try {
-            const usersSnapshot = await get(ref(db, "users"));
-            const usersData = usersSnapshot.val();
-            const pendingUsers = [];
-            const approvedUsers = [];
-            let totalRecords = 0;
-            
-            if (usersData) {
-                for (const [uid, userData] of Object.entries(usersData)) {
-                    if (uid === 'config') continue;
-                    let userEmail = userData.email || uid;
-                    let userFullName = userData.displayName || userData.fullName || "Not set";
-                    let userFarmName = userData.farmName || "Not set";
-                    let status = userData.status || "pending";
-                    let joinedDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "Unknown";
-                    
-                    const dailyCount = userData.dailyProduction ? Object.keys(userData.dailyProduction).length : 0;
-                    const eggCount = userData.eggSales ? Object.keys(userData.eggSales).length : 0;
-                    const chickenCount = userData.chickenSales ? Object.keys(userData.chickenSales).length : 0;
-                    const expensesCount = userData.expensesLog ? Object.keys(userData.expensesLog).length : 0;
-                    const recordCount = dailyCount + eggCount + chickenCount + expensesCount;
-                    totalRecords += recordCount;
-                    
-                    if (status === "pending") {
-                        pendingUsers.push({ uid, email: userEmail, fullName: userFullName, farmName: userFarmName, joined: joinedDate });
-                    } else if (status === "approved") {
-                        let userRole = ADMIN_EMAILS.includes(userEmail) ? "admin" : "user";
-                        approvedUsers.push({ uid, email: userEmail, fullName: userFullName, farmName: userFarmName, role: userRole, joined: joinedDate, records: recordCount });
-                    }
-                }
+            const users = (await get(ref(db, "users"))).val() || {};
+            const pending = [], approved = [];
+            let totalRecs = 0;
+            for(const [uid, data] of Object.entries(users)){
+                if(uid === 'config') continue;
+                const status = data.status || "pending";
+                const email = data.email || uid;
+                const name = data.displayName || data.fullName || "Not set";
+                const farm = data.farmName || "Not set";
+                const joined = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "Unknown";
+                const dCnt = data.dailyProduction ? Object.keys(data.dailyProduction).length : 0;
+                const eCnt = data.eggSales ? Object.keys(data.eggSales).length : 0;
+                const cCnt = data.chickenSales ? Object.keys(data.chickenSales).length : 0;
+                const xCnt = data.expensesLog ? Object.keys(data.expensesLog).length : 0;
+                const recs = dCnt + eCnt + cCnt + xCnt;
+                totalRecs += recs;
+                if(status === "pending") pending.push({uid,email,name,farm,joined});
+                else if(status === "approved") approved.push({uid,email,name,farm,role:ADMIN_EMAILS.includes(email)?"admin":"user",joined,records:recs});
             }
-            
-            document.getElementById("totalUsers").innerText = approvedUsers.length + pendingUsers.length;
-            document.getElementById("pendingUsers").innerText = pendingUsers.length;
-            document.getElementById("approvedUsers").innerText = approvedUsers.length;
-            document.getElementById("totalRecords").innerText = totalRecords;
-            
+            document.getElementById("totalUsers").innerText = approved.length + pending.length;
+            document.getElementById("pendingUsers").innerText = pending.length;
+            document.getElementById("approvedUsers").innerText = approved.length;
+            document.getElementById("totalRecords").innerText = totalRecs;
             const pendingTbody = document.getElementById("pendingUsersTableBody");
-            if (pendingUsers.length === 0) {
-                pendingTbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-400">No pending approvals</td></tr>';
-            } else {
-                pendingTbody.innerHTML = pendingUsers.map(u => `<tr class="border-b">
-                    <td class="p-3">${u.email}</td>
-                    <td class="p-3">${u.fullName}</td>
-                    <td class="p-3">${u.farmName}</td>
-                    <td class="p-3">${u.joined}</td>
-                    <td class="p-3">
-                        <button class="approve-user-btn approve-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-check mr-1"></i>Approve</button>
-                        <button class="reject-user-btn reject-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-times mr-1"></i>Reject</button>
-                    </td>
-                </tr>`).join('');
-            }
-            
+            pendingTbody.innerHTML = pending.length ? pending.map(u=>`<tr class="border-b"><td class="p-3">${u.email}</td><td>${u.name}</td><td>${u.farm}</td><td>${u.joined}</td><td><button class="approve-user-btn approve-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-check mr-1"></i>Approve</button><button class="reject-user-btn reject-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-times mr-1"></i>Reject</button></td></tr>`).join('') : '<tr><td colspan="5" class="text-center p-4 text-gray-400">No pending approvals</td></tr>';
             const approvedTbody = document.getElementById("approvedUsersTableBody");
-            approvedTbody.innerHTML = approvedUsers.map(u => `<tr class="border-b">
-                <td class="p-3">${u.email}</td>
-                <td class="p-3">${u.fullName}</td>
-                <td class="p-3">${u.farmName}</td>
-                <td class="p-3"><span class="role-tag ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span></td>
-                <td class="p-3">${u.joined}</td>
-                <td class="p-3"><button class="suspend-user-btn suspend-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-pause mr-1"></i>Suspend</button></td>
-            </tr>`).join('');
-            
-            document.querySelectorAll(".approve-user-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    if(confirm(`Approve user ${btn.dataset.email}?`)) {
-                        await update(ref(db, `users/${btn.dataset.uid}`), { status: "approved", approvedAt: new Date().toISOString() });
-                        showToast(`User ${btn.dataset.email} approved successfully!`);
-                        loadAdminPanel();
-                    }
-                });
-            });
-            
-            document.querySelectorAll(".reject-user-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    if(confirm(`Reject user ${btn.dataset.email}? This will delete their account.`)) {
-                        await remove(ref(db, `users/${btn.dataset.uid}`));
-                        showToast(`User ${btn.dataset.email} rejected and removed.`);
-                        loadAdminPanel();
-                    }
-                });
-            });
-            
-            document.querySelectorAll(".suspend-user-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    if(confirm(`Suspend user ${btn.dataset.email}?`)) {
-                        await update(ref(db, `users/${btn.dataset.uid}`), { status: "suspended" });
-                        showToast(`User ${btn.dataset.email} suspended.`);
-                        loadAdminPanel();
-                    }
-                });
-            });
-            
-        } catch (error) { console.error(error); showToast("Error loading admin data", true); }
+            approvedTbody.innerHTML = approved.length ? approved.map(u=>`<tr class="border-b"><td class="p-3">${u.email}</td><td>${u.name}</td><td>${u.farm}</td><td><span class="role-tag ${u.role==='admin'?'role-admin':'role-user'}">${u.role.toUpperCase()}</span></td><td>${u.joined}</td><td>${u.records} records</td><td><button class="view-data-btn view-user-data" data-uid="${u.uid}" data-email="${u.email}" data-farm="${u.farm}" data-joined="${u.joined}"><i class="fas fa-eye mr-1"></i>View</button> <button class="suspend-user-btn suspend-btn" data-uid="${u.uid}" data-email="${u.email}"><i class="fas fa-pause mr-1"></i>Suspend</button></td></tr>`).join('') : '<tr><td colspan="7" class="text-center p-4 text-gray-400">No approved users</td></tr>';
+            const selector = document.getElementById("adminUserSelector");
+            selector.innerHTML = '<option value="">-- Select a user --</option>' + approved.map(u=>`<option value="${u.uid}" data-email="${u.email}" data-farm="${u.farm}" data-joined="${u.joined}">${u.email} (${u.farm})</option>`).join('');
+            document.querySelectorAll(".approve-user-btn").forEach(btn=>btn.addEventListener("click",async()=>{ if(confirm(`Approve ${btn.dataset.email}?`)){ await update(ref(db,`users/${btn.dataset.uid}`),{status:"approved",approvedAt:new Date().toISOString()}); showToast(`${btn.dataset.email} approved`); loadAdminPanel(); } }));
+            document.querySelectorAll(".reject-user-btn").forEach(btn=>btn.addEventListener("click",async()=>{ if(confirm(`Reject ${btn.dataset.email}?`)){ await remove(ref(db,`users/${btn.dataset.uid}`)); showToast(`${btn.dataset.email} rejected`); loadAdminPanel(); } }));
+            document.querySelectorAll(".suspend-user-btn").forEach(btn=>btn.addEventListener("click",async()=>{ if(confirm(`Suspend ${btn.dataset.email}?`)){ await update(ref(db,`users/${btn.dataset.uid}`),{status:"suspended"}); showToast(`${btn.dataset.email} suspended`); loadAdminPanel(); } }));
+            document.querySelectorAll(".view-user-data").forEach(btn=>btn.addEventListener("click",()=>loadUserData(btn.dataset.uid,btn.dataset.email,btn.dataset.farm,btn.dataset.joined)));
+        } catch(e){ showToast("Error loading admin data", true); console.error(e); }
     }
 
+    document.getElementById("loadUserDataBtn")?.addEventListener("click",()=>{ const sel=document.getElementById("adminUserSelector"); const opt=sel.options[sel.selectedIndex]; if(sel.value) loadUserData(sel.value,opt.dataset.email,opt.dataset.farm,opt.dataset.joined); else showToast("Select a user",true); });
+    document.querySelectorAll(".admin-sub-tab").forEach(t=>t.addEventListener("click",()=>{ document.querySelectorAll(".admin-sub-tab").forEach(tt=>tt.classList.remove("active")); t.classList.add("active"); const type=t.dataset.userTab; ["Dashboard","Daily","EggSales","ChickenSales","Expenses","Flock"].forEach(v=>{ document.getElementById(`user${v}View`).classList.add("hidden"); }); document.getElementById(`user${type==='dashboard'?'Dashboard':type==='daily'?'Daily':type==='eggsales'?'EggSales':type==='chickensales'?'ChickenSales':type==='expenses'?'Expenses':'Flock'}View`).classList.remove("hidden"); }));
+
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById("dailyDate").value = today;
-    document.getElementById("eggSaleDate").value = today;
-    document.getElementById("chickenSaleDate").value = today;
-    document.getElementById("expenseDate").value = today;
+    ["dailyDate","eggSaleDate","chickenSaleDate","expenseDate"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today; });
 
-    document.getElementById("addDailyEntry")?.addEventListener("click", async () => {
-        const date = document.getElementById("dailyDate").value;
-        const birds = parseInt(document.getElementById("activeBirds").value);
-        const eggs = parseInt(document.getElementById("eggsCollected").value);
-        if (!date || isNaN(birds) || birds <= 0 || isNaN(eggs) || eggs < 0) { showToast("Fill all required fields correctly", true); return; }
-        const newRef = push(getUserDailyRef());
-        await set(newRef, { date, activeBirds: birds, eggsCollected: eggs, damagedEggs: parseInt(document.getElementById("damagedEggs").value) || 0, feedKg: parseFloat(document.getElementById("feedKg").value) || 0, mortality: parseInt(document.getElementById("mortalityCount").value) || 0, timestamp: new Date().toISOString() });
-        showSuccessModal(`Daily record saved! ${eggs} eggs from ${birds} birds.`);
-    });
-    
-    document.getElementById("addEggSaleBtn")?.addEventListener("click", async () => {
-        const qty = parseFloat(document.getElementById("eggSaleQuantity").value);
-        const price = parseFloat(document.getElementById("eggSaleUnitPrice").value);
-        if (isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) { showToast("Enter valid quantity and price", true); return; }
-        const total = qty * price;
-        const newRef = push(getUserEggSalesRef());
-        await set(newRef, { date: document.getElementById("eggSaleDate").value, saleType: document.getElementById("eggSaleType").value, quantity: qty, unitPrice: price, total: total, customer: document.getElementById("eggSaleCustomer").value || "Walk-in", paymentStatus: document.getElementById("eggSalePaymentStatus").value, timestamp: new Date().toISOString() });
-        showSuccessModal(`Egg sale recorded! ${qty} ${document.getElementById("eggSaleType").value} sold for KES ${total.toLocaleString()}.`);
-    });
-    
-    document.getElementById("addChickenSaleBtn")?.addEventListener("click", async () => {
-        const qty = parseFloat(document.getElementById("chickenQuantity").value);
-        const price = parseFloat(document.getElementById("chickenUnitPrice").value);
-        if (isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) { showToast("Enter valid quantity and price", true); return; }
-        const total = qty * price;
-        const weight = parseFloat(document.getElementById("chickenWeight").value) || 0;
-        const newRef = push(getUserChickenSalesRef());
-        await set(newRef, { date: document.getElementById("chickenSaleDate").value, chickenType: document.getElementById("chickenType").value, quantity: qty, unitPrice: price, weight: weight, total: total, customer: document.getElementById("chickenCustomer").value || "Walk-in", paymentStatus: document.getElementById("chickenPaymentStatus").value, timestamp: new Date().toISOString() });
-        showSuccessModal(`Chicken sale recorded! ${qty} ${document.getElementById("chickenType").value} sold for KES ${total.toLocaleString()}.`);
-    });
-    
-    document.getElementById("addExpenseBtn")?.addEventListener("click", async () => {
-        const cost = parseFloat(document.getElementById("expenseTotalCost").value);
-        if (isNaN(cost) || cost <= 0) { showToast("Enter valid expense amount", true); return; }
-        const newRef = push(getUserExpensesRef());
-        await set(newRef, { date: document.getElementById("expenseDate").value, category: document.getElementById("expenseCategory").value, description: document.getElementById("expenseDesc").value || "No description", quantity: parseFloat(document.getElementById("expenseQty").value) || 1, totalCost: cost, timestamp: new Date().toISOString() });
-        showSuccessModal(`Expense recorded! KES ${cost.toLocaleString()} spent on ${document.getElementById("expenseCategory").value}.`);
-    });
-    
-    document.getElementById("updateFlockBtn")?.addEventListener("click", async () => {
-        const flockName = document.getElementById("flockName").value.trim();
-        const totalBirds = parseInt(document.getElementById("totalBirds").value) || 0;
-        if (!flockName || totalBirds <= 0) { showToast("Please enter valid flock name and bird count", true); return; }
-        await set(getUserFlockRef(), { flockName, birdType: document.getElementById("birdType").value, totalBirds, housingType: document.getElementById("housingType").value, updatedAt: new Date().toISOString() });
-        showSuccessModal(`Flock settings saved! ${flockName} configured with ${totalBirds} birds.`);
-    });
-    
-    document.getElementById("exportReportBtn")?.addEventListener("click", () => {
-        const data = { daily: currentDaily, eggSales: currentEggSales, chickenSales: currentChickenSales, expenses: currentExpenses, exportedAt: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `poultry_report_${new Date().toISOString().split('T')[0]}.json`; a.click();
-        showSuccessModal("Report exported successfully!");
-    });
-    
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => { await signOut(auth); showToast("Logged out successfully"); });
-    document.getElementById("refreshAdminBtn")?.addEventListener("click", () => { loadAdminPanel(); showToast("Admin data refreshed"); });
+    document.getElementById("addDailyEntry")?.addEventListener("click",async()=>{ const date=document.getElementById("dailyDate").value, birds=parseInt(document.getElementById("activeBirds").value), eggs=parseInt(document.getElementById("eggsCollected").value); if(!date||isNaN(birds)||birds<=0||isNaN(eggs)||eggs<0){ showToast("Fill required fields",true); return; } await push(getRefs().daily,{date,activeBirds:birds,eggsCollected:eggs,damagedEggs:parseInt(document.getElementById("damagedEggs").value)||0,feedKg:parseFloat(document.getElementById("feedKg").value)||0,mortality:parseInt(document.getElementById("mortalityCount").value)||0,timestamp:Date.now()}); showToast("Record saved!"); });
+    document.getElementById("addEggSaleBtn")?.addEventListener("click",async()=>{ const qty=parseFloat(document.getElementById("eggSaleQuantity").value), price=parseFloat(document.getElementById("eggSaleUnitPrice").value); if(isNaN(qty)||qty<=0||isNaN(price)||price<=0){ showToast("Enter valid quantity/price",true); return; } await push(getRefs().eggSales,{date:document.getElementById("eggSaleDate").value,saleType:document.getElementById("eggSaleType").value,quantity:qty,unitPrice:price,total:qty*price,customer:document.getElementById("eggSaleCustomer").value||"Walk-in",paymentStatus:document.getElementById("eggSalePaymentStatus").value,timestamp:Date.now()}); showToast("Sale recorded!"); });
+    document.getElementById("addChickenSaleBtn")?.addEventListener("click",async()=>{ const qty=parseFloat(document.getElementById("chickenQuantity").value), price=parseFloat(document.getElementById("chickenUnitPrice").value); if(isNaN(qty)||qty<=0||isNaN(price)||price<=0){ showToast("Enter valid quantity/price",true); return; } await push(getRefs().chickenSales,{date:document.getElementById("chickenSaleDate").value,chickenType:document.getElementById("chickenType").value,quantity:qty,unitPrice:price,weight:parseFloat(document.getElementById("chickenWeight").value)||0,total:qty*price,customer:document.getElementById("chickenCustomer").value||"Walk-in",paymentStatus:document.getElementById("chickenPaymentStatus").value,timestamp:Date.now()}); showToast("Sale recorded!"); });
+    document.getElementById("addExpenseBtn")?.addEventListener("click",async()=>{ const cost=parseFloat(document.getElementById("expenseTotalCost").value); if(isNaN(cost)||cost<=0){ showToast("Enter valid expense",true); return; } await push(getRefs().expenses,{date:document.getElementById("expenseDate").value,category:document.getElementById("expenseCategory").value,description:document.getElementById("expenseDesc").value||"No description",quantity:parseFloat(document.getElementById("expenseQty").value)||1,totalCost:cost,timestamp:Date.now()}); showToast("Expense added!"); });
+    document.getElementById("updateFlockBtn")?.addEventListener("click",async()=>{ const name=document.getElementById("flockName").value.trim(), birds=parseInt(document.getElementById("totalBirds").value)||0; if(!name||birds<=0){ showToast("Enter valid flock name and bird count",true); return; } await set(getRefs().flock,{flockName:name,birdType:document.getElementById("birdType").value,totalBirds:birds,housingType:document.getElementById("housingType").value,updatedAt:Date.now()}); showToast("Settings saved!"); });
+    document.getElementById("exportReportBtn")?.addEventListener("click",()=>{ const data={daily:currentDaily,eggSales:currentEggSales,chickenSales:currentChickenSales,expenses:currentExpenses,exportedAt:new Date().toISOString()}; const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"})); a.download=`poultry_report_${today}.json`; a.click(); showToast("Report exported!"); });
+    document.getElementById("logoutBtn")?.addEventListener("click",async()=>{ await signOut(auth); showToast("Logged out"); });
+    document.getElementById("refreshAdminBtn")?.addEventListener("click",()=>{ loadAdminPanel(); showToast("Admin data refreshed"); });
+    document.getElementById("dashboardMonth")?.addEventListener("change",()=>refreshDashboard());
 
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("tab-active"));
-            btn.classList.add("tab-active");
-            const target = btn.getAttribute("data-tab");
-            document.querySelectorAll(".tab-content").forEach(sec => sec.classList.add("hidden"));
-            document.getElementById(`${target}-section`).classList.remove("hidden");
-            if (target === "flock" && currentUser) loadFlockSettings();
-            if (target === "admin" && currentUserRole === "admin") loadAdminPanel();
-        });
-    });
-    document.getElementById("dashboardMonth")?.addEventListener("change", () => refreshDashboard());
+    document.querySelectorAll(".tab-btn").forEach(btn=>btn.addEventListener("click",()=>{ document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("tab-active")); btn.classList.add("tab-active"); const target=btn.dataset.tab; document.querySelectorAll(".tab-content").forEach(sec=>sec.classList.add("hidden")); const sec=document.getElementById(`${target}-section`); if(sec) sec.classList.remove("hidden"); if(target==="flock"&&currentUser) loadFlock(); if(target==="admin"&&currentUserRole==="admin") loadAdminPanel(); }));
 
-    document.getElementById("loginBtn")?.addEventListener("click", async () => {
-        const email = document.getElementById("loginEmail").value.trim();
-        const password = document.getElementById("loginPassword").value;
-        if (!email || !password) { showToast("Enter email and password", true); return; }
-        try {
-            const userCred = await signInWithEmailAndPassword(auth, email, password);
-            const userSnapshot = await get(ref(db, `users/${userCred.user.uid}`));
-            const userData = userSnapshot.val();
-            
-            if (!userData || userData.status !== "approved") {
-                await signOut(auth);
-                if (userData && userData.status === "pending") {
-                    showToast("Your account is pending admin approval. Please wait.", true);
-                    document.getElementById("loginForm").classList.add("hidden");
-                    document.getElementById("pendingApprovalMsg").classList.remove("hidden");
-                } else if (userData && userData.status === "suspended") {
-                    showToast("Your account has been suspended. Contact admin for assistance.", true);
-                } else {
-                    showToast("Account not approved yet.", true);
-                }
-                return;
-            }
-            
-            if (document.getElementById("rememberMe").checked) { await setPersistence(auth, browserLocalPersistence); } else { await setPersistence(auth, browserSessionPersistence); }
-            showToast("Login successful!");
-        } catch(e) { 
-            if (e.code === 'auth/user-not-found') {
-                showToast("No account found. Please register first.", true);
-            } else if (e.code === 'auth/wrong-password') {
-                showToast("Incorrect password. Please try again.", true);
-            } else {
-                showToast(e.message, true);
-            }
-        }
-    });
-    
-    document.getElementById("registerBtn")?.addEventListener("click", async () => {
-        const name = document.getElementById("regName").value.trim();
-        const email = document.getElementById("regEmail").value.trim();
-        const password = document.getElementById("regPassword").value;
-        const confirm = document.getElementById("regConfirmPassword").value;
-        const farmName = document.getElementById("regFarmName").value.trim();
-        if (!name || !email || !password || !farmName) { showToast("Fill all fields", true); return; }
-        if (password !== confirm) { showToast("Passwords don't match", true); return; }
-        if (password.length < 6) { showToast("Password must be at least 6 characters", true); return; }
-        try {
-            const cred = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(cred.user, { displayName: name });
-            const isAdmin = ADMIN_EMAILS.includes(email);
-            await set(ref(db, `users/${cred.user.uid}`), { 
-                email, displayName: name, fullName: name, farmName, 
-                status: isAdmin ? "approved" : "pending",
-                role: isAdmin ? "admin" : "user",
-                createdAt: new Date().toISOString() 
-            });
-            
-            if (isAdmin) {
-                showSuccessModal(`Welcome Admin ${name}! Your admin account has been created.`);
-            } else {
-                await signOut(auth);
-                showToast("Registration successful! Awaiting admin approval.", false);
-                document.getElementById("loginForm").classList.add("hidden");
-                document.getElementById("pendingApprovalMsg").classList.remove("hidden");
-            }
-        } catch(e) { 
-            if (e.code === 'auth/email-already-in-use') {
-                showToast("Email already registered. Please login.", true);
-            } else {
-                showToast(e.message, true);
-            }
-        }
-    });
-    
-    document.getElementById("checkApprovalBtn")?.addEventListener("click", async () => {
-        const email = document.getElementById("loginEmail").value.trim();
-        if (!email) { showToast("Enter your email to check status", true); return; }
-        try {
-            const usersSnapshot = await get(ref(db, "users"));
-            const usersData = usersSnapshot.val();
-            let foundUser = null;
-            
-            if (usersData) {
-                for (const [uid, userData] of Object.entries(usersData)) {
-                    if (userData.email === email) {
-                        foundUser = userData;
-                        break;
-                    }
-                }
-            }
-            
-            if (foundUser) {
-                if (foundUser.status === "approved") {
-                    showToast("Your account has been approved! You can now login.", false);
-                    document.getElementById("pendingApprovalMsg").classList.add("hidden");
-                    document.getElementById("loginForm").classList.remove("hidden");
-                } else if (foundUser.status === "pending") {
-                    showToast("Your account is still pending approval. Please wait.", true);
-                } else if (foundUser.status === "suspended") {
-                    showToast("Your account has been suspended. Contact admin.", true);
-                }
-            } else {
-                showToast("Account not found. Please register first.", true);
-                document.getElementById("pendingApprovalMsg").classList.add("hidden");
-                document.getElementById("loginForm").classList.remove("hidden");
-            }
-        } catch (error) {
-            console.error(error);
-            showToast("Unable to check status. Please try again.", true);
-        }
-    });
-    
-    document.getElementById("showRegisterBtn")?.addEventListener("click", () => { 
-        document.getElementById("loginForm").classList.add("hidden"); 
-        document.getElementById("registerForm").classList.remove("hidden"); 
-        document.getElementById("pendingApprovalMsg").classList.add("hidden");
-    });
-    document.getElementById("showLoginBtn")?.addEventListener("click", () => { 
-        document.getElementById("registerForm").classList.add("hidden"); 
-        document.getElementById("loginForm").classList.remove("hidden");
-        document.getElementById("pendingApprovalMsg").classList.add("hidden");
-    });
+    document.getElementById("loginBtn")?.addEventListener("click",async()=>{ const email=document.getElementById("loginEmail").value.trim(), pwd=document.getElementById("loginPassword").value; if(!email||!pwd){ showToast("Enter email and password",true); return; } try{ const cred=await signInWithEmailAndPassword(auth,email,pwd); const snap=await get(ref(db,`users/${cred.user.uid}`)); const data=snap.val(); if(!data||data.status!=="approved"){ await signOut(auth); if(data&&data.status==="pending"){ showToast("Pending admin approval",true); document.getElementById("loginForm").classList.add("hidden"); document.getElementById("pendingApprovalMsg").classList.remove("hidden"); } else showToast("Account not approved",true); return; } if(document.getElementById("rememberMe").checked) await setPersistence(auth,browserLocalPersistence); showToast("Login successful!"); }catch(e){ showToast(e.message,true); } });
+    document.getElementById("registerBtn")?.addEventListener("click",async()=>{ const name=document.getElementById("regName").value.trim(), email=document.getElementById("regEmail").value.trim(), pwd=document.getElementById("regPassword").value, confirm=document.getElementById("regConfirmPassword").value, farm=document.getElementById("regFarmName").value.trim(); if(!name||!email||!pwd||!farm){ showToast("Fill all fields",true); return; } if(pwd!==confirm){ showToast("Passwords don't match",true); return; } if(pwd.length<6){ showToast("Password min 6 chars",true); return; } try{ const cred=await createUserWithEmailAndPassword(auth,email,pwd); await updateProfile(cred.user,{displayName:name}); const isAdmin=ADMIN_EMAILS.includes(email); await set(ref(db,`users/${cred.user.uid}`),{email,displayName:name,fullName:name,farmName:farm,status:isAdmin?"approved":"pending",role:isAdmin?"admin":"user",createdAt:new Date().toISOString()}); if(isAdmin){ showToast(`Welcome Admin ${name}!`); }else{ await signOut(auth); showToast("Registration successful! Awaiting admin approval.",false); document.getElementById("loginForm").classList.add("hidden"); document.getElementById("pendingApprovalMsg").classList.remove("hidden"); } }catch(e){ showToast(e.message,true); } });
+    document.getElementById("checkApprovalBtn")?.addEventListener("click",async()=>{ const email=document.getElementById("loginEmail").value.trim(); if(!email){ showToast("Enter email",true); return; } try{ const users=await get(ref(db,"users")); let found=null; for(const[u,d] of Object.entries(users.val()||{})){ if(d.email===email){ found=d; break; } } if(found){ if(found.status==="approved"){ showToast("Account approved! You can login.",false); document.getElementById("pendingApprovalMsg").classList.add("hidden"); document.getElementById("loginForm").classList.remove("hidden"); } else if(found.status==="pending") showToast("Still pending approval. Please wait.",true); else showToast("Account suspended.",true); } else showToast("Account not found.",true); }catch(e){ showToast("Error checking status",true); } });
+    document.getElementById("showRegisterBtn")?.addEventListener("click",()=>{ document.getElementById("loginForm").classList.add("hidden"); document.getElementById("registerForm").classList.remove("hidden"); document.getElementById("pendingApprovalMsg").classList.add("hidden"); });
+    document.getElementById("showLoginBtn")?.addEventListener("click",()=>{ document.getElementById("registerForm").classList.add("hidden"); document.getElementById("loginForm").classList.remove("hidden"); document.getElementById("pendingApprovalMsg").classList.add("hidden"); });
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            const userSnapshot = await get(ref(db, `users/${user.uid}`));
-            const userData = userSnapshot.val();
-            
-            if (!userData || userData.status !== "approved") {
-                await signOut(auth);
-                if (userData && userData.status === "pending") {
-                    document.getElementById("loginForm").classList.add("hidden");
-                    document.getElementById("pendingApprovalMsg").classList.remove("hidden");
-                }
-                return;
-            }
-            
-            currentUser = user;
-            currentUserRole = ADMIN_EMAILS.includes(user.email) ? "admin" : "user";
-            document.getElementById("userEmailDisplay").innerHTML = `${user.email}`;
-            const roleBadge = document.getElementById("roleBadge");
-            if (currentUserRole === "admin") {
-                roleBadge.innerHTML = '<i class="fas fa-crown mr-1"></i> Admin';
-                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold admin-badge";
-                document.getElementById("adminTabBtn").classList.remove("hidden");
-                loadAdminPanel();
-            } else {
-                roleBadge.innerHTML = '<i class="fas fa-user mr-1"></i> User';
-                roleBadge.className = "px-3 py-1 rounded-full text-xs font-semibold user-badge";
-                document.getElementById("adminTabBtn").classList.add("hidden");
-            }
-            document.getElementById("authModal").classList.add("hidden");
-            document.getElementById("mainApp").classList.remove("hidden");
-            startRealtimeListeners();
-            await loadFlockSettings();
-        } else {
-            document.getElementById("authModal").classList.remove("hidden");
-            document.getElementById("mainApp").classList.add("hidden");
-            document.getElementById("pendingApprovalMsg").classList.add("hidden");
-            document.getElementById("loginForm").classList.remove("hidden");
-            document.getElementById("registerForm").classList.add("hidden");
-        }
-    });
+    onAuthStateChanged(auth,async(user)=>{ if(user){ const snap=await get(ref(db,`users/${user.uid}`)); const data=snap.val(); if(!data||data.status!=="approved"){ await signOut(auth); if(data&&data.status==="pending"){ document.getElementById("loginForm").classList.add("hidden"); document.getElementById("pendingApprovalMsg").classList.remove("hidden"); } return; } currentUser=user; currentUserRole=ADMIN_EMAILS.includes(user.email)?"admin":"user"; document.getElementById("userEmailDisplay").innerHTML=user.email; const badge=document.getElementById("roleBadge"); if(currentUserRole==="admin"){ badge.innerHTML='<i class="fas fa-crown mr-1"></i> Admin'; badge.className="px-3 py-1 rounded-full text-xs font-semibold admin-badge"; document.getElementById("adminTabBtn").classList.remove("hidden"); loadAdminPanel(); }else{ badge.innerHTML='<i class="fas fa-user mr-1"></i> User'; badge.className="px-3 py-1 rounded-full text-xs font-semibold user-badge"; document.getElementById("adminTabBtn").classList.add("hidden"); } document.getElementById("authModal").classList.add("hidden"); document.getElementById("mainApp").classList.remove("hidden"); startListeners(); await loadFlock(); }else{ document.getElementById("authModal").classList.remove("hidden"); document.getElementById("mainApp").classList.add("hidden"); document.getElementById("pendingApprovalMsg").classList.add("hidden"); document.getElementById("loginForm").classList.remove("hidden"); document.getElementById("registerForm").classList.add("hidden"); } });
 </script>
 </body>
 </html>

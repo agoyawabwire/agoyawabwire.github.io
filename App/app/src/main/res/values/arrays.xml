@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bird_types">
+        <item>Layers (Egg Production)</item>
+        <item>Broilers (Meat Production)</item>
+        <item>Kienyeji (Local)</item>
+        <item>Dual Purpose</item>
+        <item>Day Old Chicks</item>
+    </string-array>
+
+    <string-array name="housing_types">
+        <item>Free Range</item>
+        <item>Barn</item>
+        <item>Cage System</item>
+        <item>Pasture Raised</item>
+    </string-array>
+
+    <string-array name="egg_sale_types">
+        <item>Crates (30 eggs)</item>
+        <item>Tray (30 eggs)</item>
+        <item>Single Egg</item>
+        <item>Plate (6 eggs)</item>
+    </string-array>
+
+    <string-array name="payment_statuses">
+        <item>Paid</item>
+        <item>Credit/Pending</item>
+    </string-array>
+
+    <string-array name="expense_categories">
+        <item>Feed</item>
+        <item>Vet/Medication</item>
+        <item>Labour</item>
+        <item>Utilities</item>
+        <item>Transport</item>
+        <item>Chicks Bought</item>
+        <item>Equipment</item>
+        <item>Other</item>
+    </string-array>
+</resources>

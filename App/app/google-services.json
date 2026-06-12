@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "297732089999",
+    "firebase_url": "https://poutry-569e6-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "poutry-569e6",
+    "storage_bucket": "poutry-569e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297732089999:android:17dd29f3fe00c1434de8fa",
+        "android_client_info": {
+          "package_name": "com.poultryflow.pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuaB4Ck9GMXLGiPY8zfE5IyM33A2W64fk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
